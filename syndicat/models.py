@@ -42,15 +42,6 @@ class Personnel(AbstractUser):
     def get_service(self):
         return self.le_service.nom_service
 
-#class Personnel(Utilisateur):
-
-#    class Meta:
-#        verbose_name = "personnel"
-
-#    def mon_type(self):
-        """ Utile pour ajax dans profil.js pour la maj du profil dans l'onglet 'Mon compte' """
-#        return str(type(self)).split('.')[2].replace("'", '').replace('>', '')
-
 
 class Elu(Personnel):
     syndicat = models.CharField(max_length=60, default='')
@@ -164,7 +155,6 @@ class DoleanceCse(Doleance):
 
 class Reponse(models.Model):
     recepteur = models.ForeignKey(Personnel, on_delete=models.CASCADE, related_name='recepteur_reponses')
-    # emeteur = models.ForeignKey(Elu, on_delete=models.CASCADE, related_name='reponses_emeteur')
     objet = models.CharField(max_length=42)
     contenu = models.TextField()
     date = models.DateTimeField(default=timezone.now,
@@ -203,7 +193,7 @@ class Produit(models.Model):
     disponible = models.BooleanField(default=False)
     photo = models.ImageField(upload_to='img-produits/', null=True)
     objects = models.Manager # default manager
-    produitdispo = ProduitDispo
+    produitdispo = ProduitDispo()
 
     class Meta:
         verbose_name = "produit"
@@ -232,22 +222,13 @@ class Commande(models.Model):
     commanditaire = models.ForeignKey(Personnel, on_delete=models.CASCADE,
                                       related_name='commandes')  # La liaison OneToOne vers le modèle User
 
-    # commande_honorée = False
+    #commande_honorée = False
 
     def __str__(self):
         return str(self.produit)
 
-    """def nom(self):
-        return self.user.nom
-
-    def prenom(self):
-        return self.user.prenom"""
-
     def total(self):
         return self.valeur_totale
-
-    # def produits_dispo(self):
-    #     produits = Produit.objects.filter(disponible=True)
 
 
 class Service(models.Model):
