@@ -1,9 +1,9 @@
 from django.urls import path
-from .views import PostList, PostDetail
+#from .views import ProduitList, ProduitDetail
 
 app_name = 'syndicat_api'
 
 urlpatterns = [
-    path('<int:pk>/', PostDetail.as_view(name='detailcreate')),
-    path('', PostList.as_view(name='listcreate')),
+    # path('<int:pk>/', ProduitDetail.as_view(name='detailcreate')),
+    # path('', ProduitList.as_view(name='listcreate')),
 ]
