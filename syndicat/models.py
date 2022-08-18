@@ -183,17 +183,17 @@ class ReponseCse(Reponse):
 class Produit(models.Model):
 
     # Ne renvoie que les produits disponibles
-    class ProduitDispo(models.Manager):
-        def get_queryset(self):
-            return super().get_queryset().filter(disponible=True)
+    # class ProduitDispo(models.Manager):
+    #     def get_queryset(self):
+    #         return super().get_queryset().filter(disponible=True)
 
     nom = models.CharField(max_length=42)
     prix_adulte = models.FloatField(default=0)
     prix_enfant = models.FloatField(default=0)
     disponible = models.BooleanField(default=False)
     photo = models.ImageField(upload_to='img-produits/', null=True)
-    objects = models.Manager # default manager
-    produitdispo = ProduitDispo()
+    # objects = models.Manager # default manager
+    # produitdispo = ProduitDispo()
 
     class Meta:
         verbose_name = "produit"

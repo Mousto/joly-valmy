@@ -3,8 +3,9 @@ from syndicat.models import Produit
 from .serializers import ProduitSerializer
 
 class ProduitList(generics.ListCreateAPIView):
-    queryset = Produit.produitdispo.all()
+    queryset = Produit.objects.all()
     serializer_class = ProduitSerializer
 
 class ProduitDetail(generics.RetrieveDestroyAPIView):
-    pass
+    queryset = Produit.objects.all()
+    serializer_class = ProduitSerializer
