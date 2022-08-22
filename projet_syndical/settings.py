@@ -122,10 +122,14 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-# Permissions de DRF
+# Permissions de DRF les plus utilisées ici :
+# AllowAny
+# IsAuthenticated
+# IsAuthenticatedOrReadOnly
+# IsAdminUser
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ]
 }
 
