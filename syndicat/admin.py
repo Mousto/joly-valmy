@@ -5,9 +5,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.utils.text import Truncator
 from .models import Personnel, DoleanceElu, DoleanceCse,\
     Commande, Produit, Clinique, Service, Personnel, registre_du_personnel,\
-    Elu, Reponse, Personnel, SessionCse, Cse, ReponseElu, ReponseCse 
-# import the model Todo
-from .models import Todo
+    Elu, Reponse, Personnel, SessionCse, Cse, ReponseElu, ReponseCse, Todo, Info, CategoryInfo 
 from .forms import MonPersonnelCreationForm, MonEluCreationForm, MonUserChangeForm
 
 # Register your models here.
@@ -241,3 +239,10 @@ admin.site.register(Cse, CseAdmin)
 # admin.site.register(Reponse, ReponseAdmin)
 admin.site.register(ReponseElu, ReponseEluAdmin)
 admin.site.register(ReponseCse, ReponseCseAdmin)
+
+@admin.register(Info)
+class AuteurAdmin(admin.ModelAdmin):
+    list_display = ('titre', 'id', 'status', 'slogan', 'auteur', )
+    prepopulated_fields = {'slogan': ('titre',), }
+
+admin.site.register(CategoryInfo)

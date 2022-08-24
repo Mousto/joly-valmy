@@ -8,6 +8,44 @@ from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
 
+class CategoryInfo(models.Model):
+    nom_categorie = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.nom_categorie
+
+
+class Info(models.Model):
+
+    class InfoObjects(models.Manager):
+        def get_queryset(self):
+            return super().get_queryset() .filter(status='publiée')
+
+
+    PUBLICATION = 'publiée'
+    options =(
+        ('brouillon', 'Brouillon'),
+        (PUBLICATION, 'Publiée')
+    )
+
+    categorie = models.ForeignKey(CategoryInfo, on_delete=models.CASCADE, default=1)
+    titre = models.CharField(max_length=250)
+    extrait = models.TextField(null=True)
+    contenu = models.TextField()
+    slogan = models.SlugField(max_length=250, unique_for_date=PUBLICATION)
+    publiée = models.DateTimeField(default=timezone.now)
+    auteur = models.ForeignKey('Personnel', on_delete=models.CASCADE, related_name='infos')
+    status = models.CharField(max_length=10, choices=options, default=PUBLICATION)
+    objects = models.Manager() # Manager par defaut
+    infoObjects = InfoObjects() # Manager personnalisé
+
+    class Meta:
+        ordering = ('-publiée',)
+
+    def __str__(self):
+        return self.titre
+
+
 class Todo(models.Model):
     title=models.CharField(max_length=150)
     description=models.CharField(max_length=500)
