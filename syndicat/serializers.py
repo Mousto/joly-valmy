@@ -1,0 +1,17 @@
+from rest_framework import serializers
+from syndicat.models import Personnel
+
+
+class RegisterUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Personnel
+        fields = ('email', 'username', 'password')
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        password = validated_data.pop('password', None)
+        instance = self.Meta.model(**validated_data)
+        if password is not None:
+            instance.set_password(password)
+        instance.save()
+        return instance

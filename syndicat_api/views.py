@@ -1,6 +1,14 @@
 from email import message
+from urllib import response
 from rest_framework import generics
-from rest_framework.permissions import IsAdminUser, DjangoModelPermissions, BasePermission, SAFE_METHODS, IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.permissions import (
+    IsAdminUser, 
+    DjangoModelPermissions,
+    BasePermission, 
+    SAFE_METHODS, 
+    IsAuthenticatedOrReadOnly, 
+    IsAuthenticated,
+    AllowAny,)
 from syndicat.models import Produit, Commande, DoleanceElu, Info
 from .serializers import ProduitSerializer, CommandeSerializer, DoleanceEluSerializer, InfoSerializer
 
@@ -70,3 +78,4 @@ class InfoDetail(generics.RetrieveUpdateDestroyAPIView, InfoPermission):
     permission_classes = [InfoPermission]
     queryset = Info.objects.all()
     serializer_class = InfoSerializer
+

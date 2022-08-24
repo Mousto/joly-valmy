@@ -21,3 +21,4 @@ class InfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Info
         fields = ('id', 'titre', 'auteur', 'extrait', 'contenu', 'status')
+
