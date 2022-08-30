@@ -1,6 +1,9 @@
 from email import message
 from urllib import response
 from rest_framework import generics
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.permissions import (
     IsAdminUser, 
     DjangoModelPermissions,
@@ -10,7 +13,20 @@ from rest_framework.permissions import (
     IsAuthenticated,
     AllowAny,)
 from syndicat.models import Produit, Commande, DoleanceElu, Info
-from .serializers import ProduitSerializer, CommandeSerializer, DoleanceEluSerializer, InfoSerializer
+from .serializers import ProduitSerializer, CommandeSerializer, DoleanceEluSerializer, InfoSerializer, RegisterUserSerializer
+
+# Création nouvel utilisateur
+class CustumUserCreate(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        reg_seralizer = RegisterUserSerializer(data=request.data)
+        if reg_seralizer.is_valid():
+            newuser = reg_seralizer.save()
+            if newuser:
+                return Response(status=status.HTTP_201_CREATED)
+        return Response(reg_seralizer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 # Permission Personnalisée pour les commandes
 class CommandeUserPermission(BasePermission):
@@ -40,7 +56,6 @@ class InfoPermission(BasePermission):
         return obj.auteur == request.user
 
 class ProduitList(generics.ListCreateAPIView):
-    permission_classes = [DjangoModelPermissions]
     queryset = Produit.objects.all()
     serializer_class = ProduitSerializer
 
