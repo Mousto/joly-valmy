@@ -1,9 +1,10 @@
 from django.urls import path
-from .views import ProduitList, ProduitDetail, CommandeList, CommandeDetail, DoleanceEluList, DoleanceEluDetail, InfoList, InfoDetail
+from .views import ProduitList, ProduitDetail, CommandeList, CommandeDetail, DoleanceEluList, DoleanceEluDetail, InfoList, InfoDetail, CustumUserCreate
 
 app_name = 'syndicat_api'
 
 urlpatterns = [
+    path('register/', CustumUserCreate.as_view(), name='create_user'),
     path('<int:pk>/', ProduitDetail.as_view(), name='detailcreate'),
     path('produits/', ProduitList.as_view(), name='produitlistcreate'),
     path('infos/', InfoList.as_view(), name='infolistcreate'),

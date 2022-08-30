@@ -20,8 +20,6 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         return instance
 
 
-
-
 class ProduitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Produit
