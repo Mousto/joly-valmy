@@ -40,12 +40,10 @@ class InfoPermission(BasePermission):
         return obj.auteur == request.user
 
 class ProduitList(generics.ListCreateAPIView):
-    permission_classes = [DjangoModelPermissions]
     queryset = Produit.objects.all()
     serializer_class = ProduitSerializer
 
 class ProduitDetail(generics.RetrieveDestroyAPIView):
-    permission_classes = [DjangoModelPermissions]
     queryset = Produit.objects.all()
     serializer_class = ProduitSerializer
     
