@@ -1,11 +1,12 @@
 from dataclasses import fields
 from django.contrib import admin
+from django.forms import TextInput, Textarea
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.utils.text import Truncator
 from .models import Personnel, DoleanceElu, DoleanceCse,\
     Commande, Produit, Clinique, Service, Personnel, registre_du_personnel,\
-    Elu, Reponse, Personnel, SessionCse, Cse, ReponseElu, ReponseCse, Todo, Info, CategoryInfo 
+    Elu, Reponse, Personnel, SessionCse, Cse, ReponseElu, ReponseCse, Info, CategoryInfo 
 from .forms import MonPersonnelCreationForm, MonEluCreationForm, MonUserChangeForm
 
 # Register your models here.
@@ -15,48 +16,31 @@ class TodoAdmin(admin.ModelAdmin):
   
     # add the fields of the model here
     list_display = ("title","description","completed")
-  
-# we will need to register the
-# model class and the Admin model class
-# using the register() method
-# of admin.site class
-admin.site.register(Todo,TodoAdmin)
 
-
-
-class PersonnelAdmin(UserAdmin): 
-    # Personnalisation de l'affichage et de la gestion dans la page admin
-    model: Personnel
-    add_form = MonPersonnelCreationForm
+class PersonnelAdmin(UserAdmin):
+    model = Personnel
+    search_fields = ('email', 'user_name', 'first_name',)
+    list_filter = ('email', 'user_name', 'first_name', 'is_active', 'is_staff')
+    ordering = ('-start_date',)
+    list_display = ('email', 'user_name', 'first_name',
+                    'is_active', 'is_staff')
     fieldsets = (
-        *UserAdmin.fieldsets,
-        ('Infos personnel',
-        {
-            #'classes': ['collapse', ],  # en dehors de la classe css collapse, il existe aussi wide et extrapretty
-            'fields' : (
-                'civilite',
-                'phone',
-                'la_clinique',
-                'le_service',
-            )
-        }))
+        (None, {'fields': ('email', 'user_name', 'first_name',)}),
+        ('Permissions', {'fields': ('is_staff', 'is_active')}),
+        ('Personal', {'fields': ('about',)}),
+    )
+    formfield_overrides = {
+        Personnel.apropos: {'widget': Textarea(attrs={'rows': 10, 'cols': 40})},
+    }
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('email', 'user_name', 'first_name', 'password1', 'password2', 'is_active', 'is_staff')}
+         ),
+    )
 
-class EluAdmin(UserAdmin):
-    model: Elu
-    add_form = MonPersonnelCreationForm
-    fieldsets = (
-        *UserAdmin.fieldsets,
-        ('Infos syndicales',
-        {
-            'fields' : (
-                'cse',
-                'syndicat',
-                'fonction',
-                'message_aux_collègues',
-                'photo',
-                'disponible',
-            )
-        }))
+
+
 
 class DoleanceEluAdmin(admin.ModelAdmin):
     # Personnalisation de l'affichage et de la gestion dans la page admin
@@ -223,10 +207,9 @@ class CseAdmin(admin.ModelAdmin):
 
 # Changer l'entête de la page d'administration par defaut retirer cette ligne pour le texte par défaut
 admin.site.site_header = "Page d'administration"
-# Enregistrer les models
 
+# Enregistrer les models
 admin.site.register(Personnel, PersonnelAdmin)
-admin.site.register(Elu, EluAdmin)
 admin.site.register(DoleanceElu, DoleanceEluAdmin)
 admin.site.register(DoleanceCse, DoleanceCseAdmin)
 admin.site.register(Commande, CommandeAdmin)

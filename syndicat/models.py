@@ -5,6 +5,8 @@ from django.utils import timezone
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.views.generic import TemplateView
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+
 
 # Create your models here.
 
@@ -45,18 +47,71 @@ class Info(models.Model):
     def __str__(self):
         return self.titre
 
+class CustomAccountManager(BaseUserManager):
 
-class Todo(models.Model):
-    title=models.CharField(max_length=150)
-    description=models.CharField(max_length=500)
-    completed=models.BooleanField(default=False)
+    def create_superuser(self, email, user_name, first_name, password, **other_fields):
+
+        other_fields.setdefault('is_staff', True)
+        other_fields.setdefault('is_superuser', True)
+        other_fields.setdefault('is_active', True)
+
+        if other_fields.get('is_staff') is not True:
+            raise ValueError(
+                'Superuser must be assigned to is_staff=True.')
+        if other_fields.get('is_superuser') is not True:
+            raise ValueError(
+                'Superuser must be assigned to is_superuser=True.')
+
+        return self.create_user(email, user_name, first_name, password, **other_fields)
+
+    def create_user(self, email, user_name, first_name, password, **other_fields):
+
+        if not email:
+            raise ValueError(_('You must provide an email address'))
+
+        email = self.normalize_email(email)
+        user = self.model(email=email, user_name=user_name,
+                          first_name=first_name, **other_fields)
+        user.set_password(password)
+        user.save()
+        return user
+
+
+class Personnel(AbstractBaseUser, PermissionsMixin):
+
+    email = models.EmailField(_('adresse mail'), unique=True)
+    user_name = models.CharField(max_length=150, unique=True)
+    first_name = models.CharField(max_length=150, blank=True)
+    start_date = models.DateTimeField(default=timezone.now)
+    apropos = models.TextField(_(
+        'about'), max_length=500, blank=True)
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False)
+    
+    civilite = models.CharField(max_length=12)
+    phone = PhoneNumberField(null=False, blank=False, unique=False)
+    la_clinique = models.ForeignKey('Clinique', on_delete=models.CASCADE, null=True, related_name='clinique')
+    le_service = models.ForeignKey('Service', on_delete=models.CASCADE, null=True, related_name='service')
+
+    objects = CustomAccountManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['user_name', 'first_name']
 
     def __str__(self):
-        #it will return the title
-        return self.title
+        return self.user_name
+
+    def get_clinique(self):
+        return self.la_clinique.nom_clinique
+
+    def get_service(self):
+        return self.le_service.nom_service
 
 
-class Personnel(AbstractUser):
+
+
+
+""" class Personnel(AbstractUser):
     # Mes ajouts de champs
     civilite = models.CharField(max_length=12)
     phone = PhoneNumberField(null=False, blank=False, unique=False)
@@ -67,18 +122,18 @@ class Personnel(AbstractUser):
         verbose_name = "Personnel"
     
     def __str__(self):
-        """
+        
         Cette méthode que nous définirons dans tous les modèles
         nous permettra de reconnaître facilement les différents objets que
         nous traiterons plus tard dans l'administration
-        """
+        
         return self.get_full_name() # f"{self.user.last_name} {self.user.first_name} "
     
     def get_clinique(self):
         return self.la_clinique.nom_clinique
 
     def get_service(self):
-        return self.le_service.nom_service
+        return self.le_service.nom_service """
 
 
 class Elu(Personnel):
