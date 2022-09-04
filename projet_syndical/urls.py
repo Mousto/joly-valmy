@@ -27,11 +27,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('syndicat.urls', namespace='syndicat')),
     path('api/', include('syndicat_api.urls', namespace='syndicat_api')),
-    path('api/user/', include('syndicat_api.urls', namespace='users')),
     # Ajoute un bouton 'log in' à l'interface api que l'on construit
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('api-token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api-token/refresh', TokenRefreshView.as_view(), name='token_refresh'),
+    # JWT - json web token -
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
