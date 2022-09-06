@@ -1,8 +1,7 @@
-from email import message
-from urllib import response
-from rest_framework import generics
+from rest_framework import ( 
+    viewsets,
+    status,)
 from rest_framework.views import APIView
-from rest_framework import status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import (
@@ -13,6 +12,7 @@ from rest_framework.permissions import (
     IsAuthenticatedOrReadOnly, 
     IsAuthenticated,
     AllowAny,)
+from django.shortcuts import get_object_or_404
 from syndicat.models import Produit, Commande, DoleanceElu, Info
 from .serializers import ProduitSerializer, CommandeSerializer, DoleanceEluSerializer, InfoSerializer, RegisterUserSerializer
 
@@ -71,41 +71,108 @@ class InfoPermission(BasePermission):
             return True
         return obj.auteur == request.user
 
-class ProduitList(generics.ListCreateAPIView):
+class ProduitList(viewsets.ViewSet):
+    permission_classes = [AllowAny]
+    queryset = Produit.objects.all()
+
+    def list(self, request):
+        serializer_class = ProduitSerializer(self.queryset, many=True)
+        return Response(serializer_class.data)
+
+    def retrieve(self, request, pk=None):
+        post = get_object_or_404(self.queryset, pk=pk)
+        serializer_class = ProduitSerializer(post)
+        return Response(serializer_class.data)
+
+    # def list(self, request):
+    #     pass
+
+    # def create(self, request):
+    #     pass
+
+    # def retrieve(self, request, pk=None):
+    #     pass
+
+    # def update(self, request, pk=None):
+    #     pass
+
+    # def partial_update(self, request, pk=None):
+    #     pass
+
+    # def destroy(self, request, pk=None):
+    #     pass
+
+
+""" class ProduitList(generics.ListCreateAPIView):
     queryset = Produit.objects.all()
     serializer_class = ProduitSerializer
 
 class ProduitDetail(generics.RetrieveDestroyAPIView):
     queryset = Produit.objects.all()
-    serializer_class = ProduitSerializer
-    
-class CommandeList(generics.ListCreateAPIView):
+    serializer_class = ProduitSerializer """
+
+""" Concrete View Classes
+# CreateAPIView
+Used for create-only endpoints.
+# ListAPIView
+Used for read-only endpoints to represent a collection of model instances.
+# RetrieveAPIView
+Used for read-only endpoints to represent a single model instance.
+# DestroyAPIView
+Used for delete-only endpoints for a single model instance.
+# UpdateAPIView
+Used for update-only endpoints for a single model instance.
+# ListCreateAPIView
+Used for read-write endpoints to represent a collection of model instances.
+RetrieveUpdateAPIView
+Used for read or update endpoints to represent a single model instance.
+# RetrieveDestroyAPIView
+Used for read or delete endpoints to represent a single model instance.
+# RetrieveUpdateDestroyAPIView
+Used for read-write-delete endpoints to represent a single model instance.
+"""
+
+class CommandeList(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Commande.objects.all()
-    serializer_class = CommandeSerializer
 
-class CommandeDetail(generics.RetrieveUpdateDestroyAPIView, CommandeUserPermission):
-    permission_classes = [CommandeUserPermission]
-    queryset = Commande.objects.all()
-    serializer_class = CommandeSerializer
+    def list(self, request):
+        serializer_class = CommandeSerializer(self.queryset, many=True)
+        return Response(serializer_class.data)
 
-class DoleanceEluList(generics.ListCreateAPIView):
-    permission_classes = [DjangoModelPermissions]
+    def retrieve(self, request, pk=None):
+        post = get_object_or_404(self.queryset, pk=pk)
+        serializer_class = CommandeSerializer(post)
+        return Response(serializer_class.data)
+
+ 
+class DoleanceEluList(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
     queryset = DoleanceElu.objects.all()
-    serializer_class = DoleanceEluSerializer
 
-class DoleanceEluDetail(generics.RetrieveUpdateDestroyAPIView, DoleanceEluPermission):
-    permission_classes = [DoleanceEluPermission]
-    queryset = DoleanceElu.objects.all()
-    serializer_class = DoleanceEluSerializer
+    def list(self, request):
+        serializer_class = DoleanceEluSerializer(self.queryset, many=True)
+        return Response(serializer_class.data)
 
-class InfoList(generics.ListCreateAPIView):
-    permission_classes = [DjangoModelPermissions]
-    queryset = Info.infoObjects.all()
-    serializer_class = InfoSerializer
+    def retrieve(self, request, pk=None):
+        post = get_object_or_404(self.queryset, pk=pk)
+        serializer_class = DoleanceEluSerializer(post)
+        return Response(serializer_class.data)
 
-class InfoDetail(generics.RetrieveUpdateDestroyAPIView, InfoPermission):
-    permission_classes = [InfoPermission]
+
+
+class InfoList(viewsets.ViewSet):
+    permission_classes = [AllowAny]
     queryset = Info.objects.all()
-    serializer_class = InfoSerializer
+
+    def list(self, request):
+        serializer_class = InfoSerializer(self.queryset, many=True)
+        return Response(serializer_class.data)
+
+    def retrieve(self, request, pk=None):
+        post = get_object_or_404(self.queryset, pk=pk)
+        serializer_class = InfoSerializer(post)
+        return Response(serializer_class.data)
+
+
 
