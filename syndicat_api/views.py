@@ -13,10 +13,10 @@ from rest_framework.permissions import (
     IsAuthenticated,
     AllowAny,)
 from django.shortcuts import get_object_or_404
-from syndicat.models import Produit, Commande, DoleanceElu, Info
-from .serializers import ProduitSerializer, CommandeSerializer, DoleanceEluSerializer, InfoSerializer, RegisterUserSerializer
+from syndicat.models import Produit, Commande, DoleanceElu, Info, Personnel
+from .serializers import ProduitSerializer, CommandeSerializer, DoleanceEluSerializer, InfoSerializer, RegisterUserSerializer, PersonnelSerializer
 
-# Création d'un utilisateur
+""" # Création d'un utilisateur
 class CustumUserCreate(APIView):
     permission_classes = [AllowAny]
 
@@ -26,7 +26,7 @@ class CustumUserCreate(APIView):
             newuser = reg_seralizer.save()
             if newuser:
                 return Response(status=status.HTTP_201_CREATED)
-        return Response(reg_seralizer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(reg_seralizer.errors, status=status.HTTP_400_BAD_REQUEST) """
 
 # BLACKLIST
 class BlacklistTokenUpdateView(APIView):
@@ -71,18 +71,43 @@ class InfoPermission(BasePermission):
             return True
         return obj.auteur == request.user
 
-class ProduitList(viewsets.ViewSet):
+# Utilisation de ModelViewSet
+class ProduitList(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
-    queryset = Produit.objects.all()
+    serializer_class = ProduitSerializer
 
+    # Appel de l'objet par son nom
+    def get_object(self, queryset=None, **kwargs):
+        item = self.kwargs.get('pk')
+        return get_object_or_404(Produit, nom=item)
+
+    # Définition d'un queryset personnalisé
+    def get_queryset(self):
+        return Produit.objects.all()
+
+# CRUD sur utilisateur(Personnel)
+class UserCreate(viewsets.ViewSet):
+    permission_classes = [AllowAny]
+    queryset = Personnel.objects.all()
+
+
+    def create(self, request):
+        reg_seralizer = RegisterUserSerializer(data=request.data)
+        if reg_seralizer.is_valid():
+            newuser = reg_seralizer.save()
+            if newuser:
+                return Response(status=status.HTTP_201_CREATED)
+        return Response(reg_seralizer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
     def list(self, request):
-        serializer_class = ProduitSerializer(self.queryset, many=True)
+        serializer_class = PersonnelSerializer(self.queryset, many=True)
         return Response(serializer_class.data)
 
     def retrieve(self, request, pk=None):
         post = get_object_or_404(self.queryset, pk=pk)
-        serializer_class = ProduitSerializer(post)
+        serializer_class = PersonnelSerializer(post)
         return Response(serializer_class.data)
+
 
     # def list(self, request):
     #     pass

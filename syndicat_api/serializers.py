@@ -38,4 +38,8 @@ class InfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Info
         fields = ('id', 'titre', 'auteur', 'extrait', 'contenu', 'status')
+class PersonnelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Personnel
+        fields = ('civilite', 'user_name', 'first_name', 'phone', 'email', 'apropos', 'la_clinique', 'le_service')
 
