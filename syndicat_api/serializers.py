@@ -23,12 +23,12 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 class ProduitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Produit
-        fields = '__all__'
+        fields = ('id', 'nom', 'prix_adulte', 'prix_enfant', 'disponible', 'photo')
 
 class CommandeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Commande
-        fields = '__all__'
+        fields = ['produit', 'billet_adulte', 'billet_enfant', 'valeur_totale', 'date_retrait', 'lieu_retrait', 'commanditaire']
 
 class DoleanceEluSerializer(serializers.ModelSerializer):
     class Meta:

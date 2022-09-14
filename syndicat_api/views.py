@@ -158,7 +158,7 @@ Used for read-write-delete endpoints to represent a single model instance.
 """
 
 class CommandeList(viewsets.ViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [CommandeUserPermission]
     queryset = Commande.objects.all()
 
     def list(self, request):
@@ -169,6 +169,14 @@ class CommandeList(viewsets.ViewSet):
         post = get_object_or_404(self.queryset, pk=pk)
         serializer_class = CommandeSerializer(post)
         return Response(serializer_class.data)
+    
+    def create(self, request):
+        reg_seralizer = CommandeSerializer(data=request.data)
+        if reg_seralizer.is_valid():
+            newcommande = reg_seralizer.save()
+            if newcommande:
+                return Response(status=status.HTTP_201_CREATED)
+        return Response(reg_seralizer.errors, status=status.HTTP_400_BAD_REQUEST)
 
  
 class DoleanceEluList(viewsets.ViewSet):

@@ -83,8 +83,7 @@ class Personnel(AbstractBaseUser, PermissionsMixin):
     user_name = models.CharField(max_length=150, unique=True)
     first_name = models.CharField(max_length=150, blank=True)
     start_date = models.DateTimeField(default=timezone.now)
-    apropos = models.TextField(_(
-        'about'), max_length=500, blank=True)
+    apropos = models.TextField(max_length=500, blank=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
     
