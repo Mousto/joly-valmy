@@ -80,12 +80,12 @@ class CustomAccountManager(BaseUserManager):
 class Personnel(AbstractBaseUser, PermissionsMixin):
 
     email = models.EmailField(_('adresse mail'), unique=True)
-    user_name = models.CharField(max_length=150, unique=True)
+    user_name = models.CharField(max_length=150, unique=False)
     first_name = models.CharField(max_length=150, blank=True)
     start_date = models.DateTimeField(default=timezone.now)
     apropos = models.TextField(max_length=500, blank=True)
     is_staff = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     
     civilite = models.CharField(max_length=12)
     phone = PhoneNumberField(null=False, blank=False, unique=False)
