@@ -27,7 +27,7 @@ class PersonnelAdmin(UserAdmin):
     fieldsets = (
         (None, {'fields': ('email', 'user_name', 'first_name',)}),
         ('Permissions', {'fields': ('is_staff', 'is_active')}),
-        ('Personal', {'fields': ('apropos',)}),
+        ('Personal', {'fields': ('apropos', 'phone', 'la_clinique', 'le_service', 'password')}),
     )
     formfield_overrides = {
         Personnel.apropos: {'widget': Textarea(attrs={'rows': 10, 'cols': 40})},

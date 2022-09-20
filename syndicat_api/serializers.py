@@ -8,7 +8,8 @@ from syndicat.models import Produit, Commande, DoleanceElu, Info, Personnel
 class RegisterUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = Personnel
-        fields = ('email', 'user_name', 'password')
+        fields = ('email', 'user_name', 'first_name', 'civilite', 
+            'phone', 'la_clinique', 'le_service', 'password')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):

@@ -81,7 +81,7 @@ class Personnel(AbstractBaseUser, PermissionsMixin):
 
     email = models.EmailField(_('adresse mail'), unique=True)
     user_name = models.CharField(max_length=150, unique=False)
-    first_name = models.CharField(max_length=150, blank=True)
+    first_name = models.CharField(max_length=150, blank=False)
     start_date = models.DateTimeField(default=timezone.now)
     apropos = models.TextField(max_length=500, blank=True)
     is_staff = models.BooleanField(default=False)
@@ -89,8 +89,8 @@ class Personnel(AbstractBaseUser, PermissionsMixin):
     
     civilite = models.CharField(max_length=12)
     phone = PhoneNumberField(null=False, blank=False, unique=False)
-    la_clinique = models.ForeignKey('Clinique', on_delete=models.CASCADE, null=True, related_name='clinique')
-    le_service = models.ForeignKey('Service', on_delete=models.CASCADE, null=True, related_name='service')
+    la_clinique = models.ForeignKey('Clinique', on_delete=models.CASCADE, null=False, related_name='clinique')
+    le_service = models.ForeignKey('Service', on_delete=models.CASCADE, null=False, related_name='service')
 
     objects = CustomAccountManager()
 
