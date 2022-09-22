@@ -1,5 +1,6 @@
 from rest_framework import ( 
     viewsets,
+    generics,
     status,)
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -13,8 +14,8 @@ from rest_framework.permissions import (
     IsAuthenticated,
     AllowAny,)
 from django.shortcuts import get_object_or_404
-from syndicat.models import Produit, Commande, DoleanceElu, Info, Personnel
-from .serializers import ProduitSerializer, CommandeSerializer, DoleanceEluSerializer, InfoSerializer, RegisterUserSerializer, PersonnelSerializer
+from syndicat.models import Produit, Commande, DoleanceElu, Info, Personnel, Clinique, Service
+from .serializers import ProduitSerializer, CommandeSerializer, DoleanceEluSerializer, InfoSerializer, RegisterUserSerializer, PersonnelSerializer, CliniqueSerializer, ServiceSerializer
 
 """ # Création d'un utilisateur
 class CustumUserCreate(APIView):
@@ -92,7 +93,9 @@ class UserCreate(viewsets.ViewSet):
 
 
     def create(self, request):
+        
         reg_seralizer = RegisterUserSerializer(data=request.data)
+       # print('************* CreateUser *********************', reg_seralizer.is_valid)
         if reg_seralizer.is_valid():
             newuser = reg_seralizer.save()
             if newuser:
@@ -207,5 +210,35 @@ class InfoList(viewsets.ViewSet):
         serializer_class = InfoSerializer(post)
         return Response(serializer_class.data)
 
+class Cliniques(viewsets.ViewSet):
+    permission_classes = [AllowAny]
+    queryset = Clinique.objects.all()
+
+    def list(self, request):
+        serializer_class = CliniqueSerializer(self.queryset, many=True)
+        return Response(serializer_class.data)
+
+    def retrieve(self, request, pk=None):
+        post = get_object_or_404(self.queryset, pk=pk)
+        serializer_class = CliniqueSerializer(post)
+        return Response(serializer_class.data)
+class Services(viewsets.ViewSet):
+    permission_classes = [AllowAny]
+    queryset = Service.objects.all()
+
+    def list(self, request):
+        serializer_class = ServiceSerializer(self.queryset, many=True)
+        return Response(serializer_class.data)
+
+    def retrieve(self, request, pk=None):
+        post = get_object_or_404(self.queryset, pk=pk)
+        serializer_class = ServiceSerializer(post)
+        return Response(serializer_class.data)
 
 
+class ListServicesByCliniqueIdView(generics.ListAPIView):
+    serializer_class = ServiceSerializer
+
+    def get_queryset(self):
+        clinique = self.kwargs['pk']
+        return Service.objects.filter(clinique=clinique)

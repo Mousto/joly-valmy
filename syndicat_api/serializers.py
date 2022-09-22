@@ -1,7 +1,7 @@
 from dataclasses import fields
 from pyexpat import model
 from rest_framework import serializers
-from syndicat.models import Produit, Commande, DoleanceElu, Info, Personnel
+from syndicat.models import Produit, Commande, DoleanceElu, Info, Personnel, Clinique, Service
 
 
 
@@ -11,7 +11,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         fields = ('email', 'user_name', 'first_name', 'civilite', 
             'phone', 'la_clinique', 'le_service', 'password')
         extra_kwargs = {'password': {'write_only': True}}
-
+       
     def create(self, validated_data):
         password = validated_data.pop('password', None)
         instance = self.Meta.model(**validated_data)
@@ -43,4 +43,12 @@ class PersonnelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Personnel
         fields = ('civilite', 'user_name', 'first_name', 'phone', 'email', 'apropos', 'la_clinique', 'le_service')
+class CliniqueSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Clinique
+        fields = '__all__'
+class ServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = '__all__'
 
