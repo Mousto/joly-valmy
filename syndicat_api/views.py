@@ -91,11 +91,10 @@ class UserCreate(viewsets.ViewSet):
     permission_classes = [AllowAny]
     queryset = Personnel.objects.all()
 
-
     def create(self, request):
         
         reg_seralizer = RegisterUserSerializer(data=request.data)
-       # print('************* CreateUser *********************', reg_seralizer.is_valid)
+        print('************* CreateUser *********************', reg_seralizer.is_valid)
         if reg_seralizer.is_valid():
             newuser = reg_seralizer.save()
             if newuser:
