@@ -20,7 +20,7 @@ class TodoAdmin(admin.ModelAdmin):
 class PersonnelAdmin(UserAdmin):
     model = Personnel
     search_fields = ('email', 'user_name', 'first_name',)
-    list_filter = ('email', 'user_name', 'first_name', 'is_active', 'is_staff')
+    list_filter = ('email', 'user_name', 'first_name', 'is_staff')
     ordering = ('-start_date',)
     list_display = ('email', 'user_name', 'first_name',
                     'is_active', 'is_staff')
@@ -39,9 +39,18 @@ class PersonnelAdmin(UserAdmin):
          ),
     )
 
-
-
-
+class EluAdmin(PersonnelAdmin):
+    model = Elu
+    fieldsets = (
+        (None, {'fields': ('email', 'user_name', 'first_name', 'syndicat')}),
+        ('Permissions', {'fields': ('is_staff', 'is_active')}),
+        ('Personal', {'fields': ('message_aux_collègues', 'apropos','phone', 'la_clinique', 'le_service', 'disponible', 'password')}),
+    )
+    formfield_overrides = {
+        Elu.apropos: {'widget': Textarea(attrs={'rows': 10, 'cols': 40})},
+        Elu.message_aux_collègues: {'widget': Textarea(attrs={'rows': 10, 'cols': 40})},
+    }
+    
 class DoleanceEluAdmin(admin.ModelAdmin):
     # Personnalisation de l'affichage et de la gestion dans la page admin
     list_display = ('emeteur', 'apercu_contenu', 'objet', 'destinataire')
@@ -145,7 +154,7 @@ class ProduitAdmin(admin.ModelAdmin): # Personnalisation de l'affichage et de la
 
 class CliniqueAdmin(admin.ModelAdmin):
     # list_display = ('nom_clinique', 'les_services')
-    list_display = ('nom_clinique', 'adresse')
+    list_display = ('id','nom_clinique', 'adresse')
     list_filter = ('nom_clinique', 'adresse')
     ordering = ('nom_clinique',)
     search_fields = ('nom_clinique',)
@@ -210,6 +219,7 @@ admin.site.site_header = "Page d'administration"
 
 # Enregistrer les models
 admin.site.register(Personnel, PersonnelAdmin)
+admin.site.register(Elu, EluAdmin)
 admin.site.register(DoleanceElu, DoleanceEluAdmin)
 admin.site.register(DoleanceCse, DoleanceCseAdmin)
 admin.site.register(Commande, CommandeAdmin)

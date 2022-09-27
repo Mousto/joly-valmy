@@ -14,8 +14,8 @@ from rest_framework.permissions import (
     IsAuthenticated,
     AllowAny,)
 from django.shortcuts import get_object_or_404
-from syndicat.models import Produit, Commande, DoleanceElu, Info, Personnel, Clinique, Service
-from .serializers import ProduitSerializer, CommandeSerializer, DoleanceEluSerializer, InfoSerializer, RegisterUserSerializer, PersonnelSerializer, CliniqueSerializer, ServiceSerializer
+from syndicat.models import Produit, Commande, DoleanceElu, Info, Personnel, Clinique, Service, Elu
+from .serializers import ProduitSerializer, CommandeSerializer, DoleanceEluSerializer, InfoSerializer, RegisterPersonnelSerializer, PersonnelSerializer, CliniqueSerializer, ServiceSerializer, RegisterEluSerializer
 
 """ # Création d'un utilisateur
 class CustumUserCreate(APIView):
@@ -92,9 +92,12 @@ class UserCreate(viewsets.ViewSet):
     queryset = Personnel.objects.all()
 
     def create(self, request):
-        
-        reg_seralizer = RegisterUserSerializer(data=request.data)
-        print('************* CreateUser *********************', reg_seralizer.is_valid)
+        reg_seralizer = ""
+        #print('**************',request.data['elu'])
+        if(request.data['elu'] == True):
+            reg_seralizer = RegisterEluSerializer(data=request.data)
+        else:
+            reg_seralizer = RegisterPersonnelSerializer(data=request.data)
         if reg_seralizer.is_valid():
             newuser = reg_seralizer.save()
             if newuser:
@@ -236,6 +239,7 @@ class Services(viewsets.ViewSet):
 
 
 class ListServicesByCliniqueIdView(generics.ListAPIView):
+    permission_classes = [AllowAny]
     serializer_class = ServiceSerializer
 
     def get_queryset(self):

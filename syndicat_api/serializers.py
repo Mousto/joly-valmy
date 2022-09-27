@@ -1,24 +1,38 @@
 from dataclasses import fields
 from pyexpat import model
 from rest_framework import serializers
-from syndicat.models import Produit, Commande, DoleanceElu, Info, Personnel, Clinique, Service
+from syndicat.models import Produit, Commande, DoleanceElu, Info, Personnel, Clinique, Service, Elu
 
 
 
-class RegisterUserSerializer(serializers.ModelSerializer):
+class RegisterPersonnelSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Personnel
         fields = ('email', 'user_name', 'first_name', 'civilite', 
             'phone', 'la_clinique', 'le_service', 'password')
         extra_kwargs = {'password': {'write_only': True}}
+
+    def quelleInstance(self, instance, donnees):
+        if instance == True:
+            return RegisterEluSerializer(data=donnees)
        
     def create(self, validated_data):
         password = validated_data.pop('password', None)
         instance = self.Meta.model(**validated_data)
+        
         if password is not None:
             instance.set_password(password)
         instance.save()
         return instance
+
+class RegisterEluSerializer(RegisterPersonnelSerializer):
+
+    class Meta:
+        model = Elu
+        fields = RegisterPersonnelSerializer.Meta.fields + ('syndicat', 'photo', 'fonction', 'message_aux_collègues', 'cse', 'disponible', )
+        extra_kwargs = {'password': {'write_only': True}}
+        #extra_kwargs = RegisterPersonnelSerializer.Meta.extra_kwargs
 
 
 class ProduitSerializer(serializers.ModelSerializer):
