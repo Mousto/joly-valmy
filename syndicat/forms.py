@@ -1,10 +1,10 @@
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import Personnel, Elu
+from .models import Utilisateur, Elu
 
 class MonPersonnelCreationForm(UserCreationForm):
 
     class Meta:
-        model = Personnel
+        model = Utilisateur
         fields = "__all__"
 class MonEluCreationForm(UserCreationForm):
 
@@ -15,5 +15,5 @@ class MonEluCreationForm(UserCreationForm):
 class MonUserChangeForm(UserChangeForm):
 
     class Meta:
-        model = Personnel
+        model = Utilisateur
         fields = UserChangeForm.Meta.fields

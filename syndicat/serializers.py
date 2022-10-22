@@ -1,10 +1,10 @@
 from rest_framework import serializers
-from syndicat.models import Personnel
+from syndicat.models import Utilisateur
 
 
 class RegisterUserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Personnel
+        model = Utilisateur
         fields = ('email', 'username', 'password')
         extra_kwargs = {'password': {'write_only': True}}
 

@@ -4,7 +4,7 @@ from django.forms import TextInput, Textarea
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.utils.text import Truncator
-from .models import Personnel, DoleanceElu, DoleanceCse,\
+from .models import Utilisateur, DoleanceElu, DoleanceCse,\
     Commande, Produit, Clinique, Service, Personnel, registre_du_personnel,\
     Elu, Reponse, Personnel, SessionCse, Cse, ReponseElu, ReponseCse, Info, CategoryInfo 
 from .forms import MonPersonnelCreationForm, MonEluCreationForm, MonUserChangeForm
@@ -17,8 +17,8 @@ class TodoAdmin(admin.ModelAdmin):
     # add the fields of the model here
     list_display = ("title","description","completed")
 
-class PersonnelAdmin(UserAdmin):
-    model = Personnel
+class UtilisateurAdmin(UserAdmin):
+    model = Utilisateur
     search_fields = ('email', 'user_name', 'first_name',)
     list_filter = ('email', 'user_name', 'first_name', 'is_staff')
     ordering = ('-start_date',)
@@ -27,10 +27,11 @@ class PersonnelAdmin(UserAdmin):
     fieldsets = (
         (None, {'fields': ('email', 'user_name', 'first_name',)}),
         ('Permissions', {'fields': ('is_staff', 'is_active')}),
-        ('Personal', {'fields': ('apropos', 'phone', 'la_clinique', 'le_service', 'password')}),
+        ('Personal', {'fields': ('apropos', 'password')}),
+        #  'phone', 'la_clinique', 'le_service',
     )
     formfield_overrides = {
-        Personnel.apropos: {'widget': Textarea(attrs={'rows': 10, 'cols': 40})},
+        Utilisateur.apropos: {'widget': Textarea(attrs={'rows': 10, 'cols': 40})},
     }
     add_fieldsets = (
         (None, {
@@ -38,6 +39,16 @@ class PersonnelAdmin(UserAdmin):
             'fields': ('email', 'user_name', 'first_name', 'password1', 'password2', 'is_active', 'is_staff')}
          ),
     )
+    
+
+class PersonnelAdmin(UtilisateurAdmin):
+    model: Personnel
+    fieldsets = (
+        (None, {'fields': ('email', 'user_name', 'first_name',)}),
+        ('Permissions', {'fields': ('is_staff', 'is_active')}),
+        ('Personal', {'fields': ('apropos', 'phone', 'la_clinique', 'le_service', 'password')}),
+    )
+    
 
 class EluAdmin(PersonnelAdmin):
     model = Elu
@@ -218,6 +229,7 @@ class CseAdmin(admin.ModelAdmin):
 admin.site.site_header = "Page d'administration"
 
 # Enregistrer les models
+admin.site.register(Utilisateur, UtilisateurAdmin)
 admin.site.register(Personnel, PersonnelAdmin)
 admin.site.register(Elu, EluAdmin)
 admin.site.register(DoleanceElu, DoleanceEluAdmin)

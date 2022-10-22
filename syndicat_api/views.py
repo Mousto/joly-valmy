@@ -14,7 +14,7 @@ from rest_framework.permissions import (
     IsAuthenticated,
     AllowAny,)
 from django.shortcuts import get_object_or_404
-from syndicat.models import Produit, Commande, DoleanceElu, Info, Personnel, Clinique, Service, Elu
+from syndicat.models import Produit, Commande, DoleanceElu, Info, Utilisateur, Clinique, Service, Elu
 from .serializers import ProduitSerializer, CommandeSerializer, DoleanceEluSerializer, InfoSerializer, RegisterPersonnelSerializer, PersonnelSerializer, CliniqueSerializer, ServiceSerializer, RegisterEluSerializer
 
 """ # Création d'un utilisateur
@@ -89,16 +89,17 @@ class ProduitList(viewsets.ModelViewSet):
 # CRUD sur utilisateur(Personnel)
 class UserCreate(viewsets.ViewSet):
     permission_classes = [AllowAny]
-    queryset = Personnel.objects.all()
+    queryset = Utilisateur.objects.all()
 
     def create(self, request):
         reg_seralizer = ""
-        #print('**************',request.data['elu'])
+        print('**************',request.data['elu'])
         if(request.data['elu'] == True):
             reg_seralizer = RegisterEluSerializer(data=request.data)
         else:
             reg_seralizer = RegisterPersonnelSerializer(data=request.data)
         if reg_seralizer.is_valid():
+            print('valid')
             newuser = reg_seralizer.save()
             if newuser:
                 return Response(status=status.HTTP_201_CREATED)

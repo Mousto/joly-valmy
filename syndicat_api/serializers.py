@@ -30,8 +30,8 @@ class RegisterEluSerializer(RegisterPersonnelSerializer):
 
     class Meta:
         model = Elu
-        fields = RegisterPersonnelSerializer.Meta.fields + ('syndicat', 'photo', 'fonction', 'message_aux_collègues', 'cse', 'disponible', )
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = RegisterPersonnelSerializer.Meta.fields + ('syndicat', 'photo', 'fonction', 'message_aux_collègues', 'disponible', )
+        #extra_kwargs = {'password': {'write_only': True}}
         #extra_kwargs = RegisterPersonnelSerializer.Meta.extra_kwargs
 
 
