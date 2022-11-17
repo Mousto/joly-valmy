@@ -15,5 +15,6 @@ router.register('services', Services, basename='services')
 urlpatterns = [
     path('', include(router.urls)),
     path('serviceParClinique-list/<pk>/', ListServicesByCliniqueIdView.as_view(), name='serviceParClinique'),
+    path('user/logout/blacklist/', BlacklistTokenUpdateView.as_view(), name='blacklistToken'),
 ]
 #urlpatterns = router.urls

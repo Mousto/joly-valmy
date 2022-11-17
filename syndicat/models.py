@@ -1,5 +1,5 @@
 from email.policy import default
-from django.contrib.auth.models import AbstractUser
+#from django.contrib.auth.models import AbstractUser
 from phonenumber_field.modelfields import PhoneNumberField
 from django.db import models
 from django.utils import timezone
@@ -94,7 +94,7 @@ class Utilisateur(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = []
 
     def __str__(self):
-        return self.user_name
+        return f"{self.user_name} {self.first_name}"
 
     
 
@@ -297,6 +297,11 @@ class Produit(models.Model):
 
 
 class Commande(models.Model):
+
+    class CommandeObjects(models.Manager):
+        def get_queryset(self):
+            return super().get_queryset() .filter(commanditaire=self.commanditaire)
+
     choix_clinique = (
         ('Talant', 'Bénigne joly'),
         ('Valmy', 'SSR Valmy'),
@@ -314,9 +319,14 @@ class Commande(models.Model):
     date = models.DateField(default=timezone.now,
                             verbose_name="Date de commande")
     commanditaire = models.ForeignKey(Utilisateur, on_delete=models.CASCADE,
-                                      related_name='commandes')  # La liaison OneToOne vers le modèle User
+                                      related_name='commanditaire')  # La liaison OneToOne vers le modèle User
 
     #commande_honorée = False
+
+
+    objects = models.Manager() # Manager par defaut
+    infoObjects = CommandeObjects() # Manager personnalisé
+
 
     def __str__(self):
         return str(self.produit)

@@ -41,9 +41,13 @@ class ProduitSerializer(serializers.ModelSerializer):
         fields = ('id', 'nom', 'prix_adulte', 'prix_enfant', 'disponible', 'photo')
 
 class CommandeSerializer(serializers.ModelSerializer):
+
+    # Nous redéfinissons l'attribut 'produit' qui porte le même nom que dans la liste des champs à afficher
+    produit = ProduitSerializer(read_only=True)
+
     class Meta:
         model = Commande
-        fields = ['produit', 'billet_adulte', 'billet_enfant', 'valeur_totale', 'date_retrait', 'lieu_retrait', 'commanditaire']
+        fields = ['id', 'produit', 'billet_adulte', 'billet_enfant', 'valeur_totale', 'date_retrait', 'date', 'lieu_retrait', 'commanditaire']
 
 class DoleanceEluSerializer(serializers.ModelSerializer):
     class Meta:

@@ -22,11 +22,11 @@ class UtilisateurAdmin(UserAdmin):
     search_fields = ('email', 'user_name', 'first_name',)
     list_filter = ('email', 'user_name', 'first_name', 'is_staff')
     ordering = ('-start_date',)
-    list_display = ('email', 'user_name', 'first_name',
+    list_display = ('id', 'email', 'user_name', 'first_name',
                     'is_active', 'is_staff')
     fieldsets = (
         (None, {'fields': ('email', 'user_name', 'first_name',)}),
-        ('Permissions', {'fields': ('is_staff', 'is_active')}),
+        ('Permissions', {'fields': ('is_superuser', 'is_staff', 'is_active', 'groups')}),
         ('Personal', {'fields': ('apropos', 'password')}),
         #  'phone', 'la_clinique', 'le_service',
     )
@@ -45,7 +45,7 @@ class PersonnelAdmin(UtilisateurAdmin):
     model: Personnel
     fieldsets = (
         (None, {'fields': ('email', 'user_name', 'first_name',)}),
-        ('Permissions', {'fields': ('is_staff', 'is_active')}),
+        ('Permissions', {'fields': ('is_superuser', 'is_staff', 'is_active','groups')}),
         ('Personal', {'fields': ('apropos', 'phone', 'la_clinique', 'le_service', 'password')}),
     )
     
@@ -54,7 +54,7 @@ class EluAdmin(PersonnelAdmin):
     model = Elu
     fieldsets = (
         (None, {'fields': ('email', 'user_name', 'first_name', 'syndicat')}),
-        ('Permissions', {'fields': ('is_staff', 'is_active')}),
+        ('Permissions', {'fields': ('is_superuser', 'is_staff', 'is_active','groups')}),
         ('Personal', {'fields': ('message_aux_collègues', 'apropos','phone', 'la_clinique', 'le_service', 'disponible', 'password')}),
     )
     formfield_overrides = {
@@ -143,8 +143,8 @@ class DoleanceCseAdmin(admin.ModelAdmin):
 
 
 class CommandeAdmin(admin.ModelAdmin): # Personnalisation de l'affichage et de la gestion dans la page admin
-    list_display = ('produit', 'commanditaire', 'prix_enfant','prix_adulte','billet_enfant', 'billet_adulte', 'total', 'lieu_retrait', 'date_retrait', 'date')
-    list_filter = ('produit', 'lieu_retrait', 'commanditaire')
+    list_display = ('id','produit', 'commanditaire', 'prix_enfant','prix_adulte','billet_enfant', 'billet_adulte', 'total', 'lieu_retrait', 'date_retrait', 'date')
+    list_filter = ('produit', 'id', 'lieu_retrait', 'commanditaire')
     date_hierarchy = 'date'
     ordering = ('date', )
     search_fields  = ('valeur_totale',)

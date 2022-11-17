@@ -52,6 +52,7 @@ class CommandeUserPermission(BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:
             return True
+        print('*******************', request.method in SAFE_METHODS)
         return obj.commanditaire == request.user
 
 # Permission Personnalisée pour les DoleanceElu
@@ -165,21 +166,32 @@ Used for read-write-delete endpoints to represent a single model instance.
 
 class CommandeList(viewsets.ViewSet):
     permission_classes = [CommandeUserPermission]
-    queryset = Commande.objects.all()
+    def get_queryset(self):
+        """
+        This view should return a list of all the purchases
+        for the currently authenticated user.
+        """
+        user = self.request.user.id
+        return Commande.objects.filter(commanditaire=user)
 
     def list(self, request):
-        serializer_class = CommandeSerializer(self.queryset, many=True)
+        print('#######################', request.user.id)
+        serializer_class = CommandeSerializer(self.get_queryset(), many=True)
         return Response(serializer_class.data)
 
     def retrieve(self, request, pk=None):
-        post = get_object_or_404(self.queryset, pk=pk)
+        queryset = self.get_queryset()
+        post = get_object_or_404(queryset, pk=pk)
         serializer_class = CommandeSerializer(post)
         return Response(serializer_class.data)
     
     def create(self, request):
+        produit_id = request.data['produit']  # or however you are sending the id
         reg_seralizer = CommandeSerializer(data=request.data)
+        print('#####################################@',reg_seralizer.is_valid())
         if reg_seralizer.is_valid():
-            newcommande = reg_seralizer.save()
+            produit_instance = get_object_or_404(Produit, id=produit_id)
+            newcommande = reg_seralizer.save(produit=produit_instance)
             if newcommande:
                 return Response(status=status.HTTP_201_CREATED)
         return Response(reg_seralizer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -201,7 +213,7 @@ class DoleanceEluList(viewsets.ViewSet):
 
 
 class InfoList(viewsets.ViewSet):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     queryset = Info.objects.all()
 
     def list(self, request):
