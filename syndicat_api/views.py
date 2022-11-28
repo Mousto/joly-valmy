@@ -166,6 +166,8 @@ Used for read-write-delete endpoints to represent a single model instance.
 
 class CommandeList(viewsets.ViewSet):
     permission_classes = [CommandeUserPermission]
+    serializer_class = CommandeSerializer
+    
     def get_queryset(self):
         """
         This view should return a list of all the purchases
@@ -175,7 +177,7 @@ class CommandeList(viewsets.ViewSet):
         return Commande.objects.filter(commanditaire=user)
 
     def list(self, request):
-        print('#######################', request.user.id)
+        #print('#######################', request.user.id)
         serializer_class = CommandeSerializer(self.get_queryset(), many=True)
         return Response(serializer_class.data)
 
@@ -188,13 +190,41 @@ class CommandeList(viewsets.ViewSet):
     def create(self, request):
         produit_id = request.data['produit']  # or however you are sending the id
         reg_seralizer = CommandeSerializer(data=request.data)
-        print('#####################################@',reg_seralizer.is_valid())
+        #print('#####################################@',reg_seralizer.is_valid())
         if reg_seralizer.is_valid():
             produit_instance = get_object_or_404(Produit, id=produit_id)
             newcommande = reg_seralizer.save(produit=produit_instance)
             if newcommande:
                 return Response(status=status.HTTP_201_CREATED)
         return Response(reg_seralizer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def destroy(self, request, pk=None):
+        item = Commande.objects.filter(id=pk)
+        if len(item) == 1:
+            item.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+    def update(self, request, pk=None):
+        commande = Commande.objects.get(id=pk)
+        print(request.data)
+        data = {
+            "billet_adulte": request.data['billet_adulte'],
+            "billet_enfant": request.data['billet_enfant'],
+            "valeur_totale": request.data['valeur_totale'],
+            "date_retrait": request.data['date_retrait'],
+            "lieu_retrait": request.data['lieu_retrait'],
+            }
+        serializer = self.serializer_class(commande, data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        print('Je modifie une commande ici')
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    def partial_update(self, request, pk=None):
+        return Response({'http_method': 'PATCH'})
 
  
 class DoleanceEluList(viewsets.ViewSet):
