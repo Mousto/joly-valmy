@@ -1,3 +1,4 @@
+from django.http import Http404
 from rest_framework import ( 
     viewsets,
     generics,
@@ -14,6 +15,8 @@ from rest_framework.permissions import (
     IsAuthenticated,
     AllowAny,)
 from django.shortcuts import get_object_or_404
+import json
+
 from syndicat.models import Produit, Commande, DoleanceElu, Info, Utilisateur, Clinique, Service, Elu
 from .serializers import ProduitSerializer, CommandeSerializer, DoleanceEluSerializer, InfoSerializer, RegisterPersonnelSerializer, PersonnelSerializer, CliniqueSerializer, ServiceSerializer, RegisterEluSerializer
 
@@ -74,18 +77,116 @@ class InfoPermission(BasePermission):
         return obj.auteur == request.user
 
 # Utilisation de ModelViewSet
-class ProduitList(viewsets.ModelViewSet):
+class ProduitList(viewsets.ViewSet):
     permission_classes = [AllowAny]
     serializer_class = ProduitSerializer
+    queryset = Produit.objects.all()
+
+    def get_object(self, pk):
+        try:
+            return Produit.objects.get(pk=pk)
+        except Produit.DoesNotExist:
+            raise Http404
+
+    # Renvoie tous les produits
+    def list(self, request):
+        serializer_class = ProduitSerializer(self.queryset, many=True)
+        return Response(serializer_class.data)
+
+    # Renvoie un produit
+    def retrieve(self, request, pk=None):
+        produit = get_object_or_404(self.queryset, pk=pk)
+        print('*******************',produit)
+        serializer_class = ProduitSerializer(produit)
+        return Response(serializer_class.data)  
+
+    # Crée un produit
+    def create(self, request):
+        donnees = {
+            'nom': request.data['donnees[nom]'],
+            'prix_adulte': request.data['donnees[prix_adulte]'],
+            'prix_enfant': request.data['donnees[prix_enfant]'],
+            'photo': request.data['image'],
+            'disponible': True,
+        }
+        reg_seralizer = ProduitSerializer(data=donnees)
+        if reg_seralizer.is_valid():
+            newProduit = reg_seralizer.save()
+            if newProduit:
+                # déserialisation avant retour réponse au front
+                produit = ProduitSerializer(newProduit).data
+                return Response(data=produit, status=status.HTTP_201_CREATED)
+        return Response(reg_seralizer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # Supprimer un produit
+    def destroy(self, request, pk=None):
+        produit = get_object_or_404(self.queryset, pk=pk)
+        produit.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # Update produit
+    # def patch(self, request, pk=None):
+    #     pass
+        # donnees = {
+        #     'nom': request.data['donnees[nom]'],
+        #      'prix_adulte': request.data['donnees[prix_adulte]'],
+        #      'prix_enfant': request.data['donnees[prix_enfant]'],
+        #      #'photo': request.data['image']
+        #      #'photo': request.FILES['image']
+        # }
+       # print('***********************',request.data["image"])
+        # produit = get_object_or_404(self.queryset, pk=pk)
+        # serializer = ProduitSerializer(produit, request.data, partial=True) # set partial=True to update a data partially
+        # print(serializer.is_valid())
+        # if serializer.is_valid():
+        #     serializer.save()
+        #     return Response(status=status.HTTP_201_CREATED, data=serializer.data)
+        # return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        # produit = Produit.objects.get(id=pk)
+        # print(request.data)
+        # donnees = {
+        #     'nom': request.data['donnees[nom]'],
+        #      'prix_adulte': request.data['donnees[prix_adulte]'],
+        #      'prix_enfant': request.data['donnees[prix_enfant]'],
+        #      'photo': request.data['image']
+        # }
+        # if(request.data['donnees[nom]']):
+        #     produit.nom = request.data['donnees[nom]'] 
+        #     produit.save()  
+        #     print('J ai modifie un produit ici')
+        #     return Response(data={'id': produit.id}, status=status.HTTP_201_CREATED)
+        # print('Modification échec !')
+        # return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    def partial_update(self, request, pk=None):
+        produit = get_object_or_404(self.queryset, pk=pk)
+        # Decode UTF-8 bytes to Unicode, and convert single quotes 
+        # to double quotes to make it valid JSON
+        my_json = request.body.decode('utf8').replace("'", '"')
+        #print('************************',my_json)
+
+        # Load the JSON to get a Python dict
+        data = json.loads(my_json)
+        #print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$',type(data))    
+        serializer = ProduitSerializer(produit, data, partial=True) # set partial=True to update a data partially
+        
+        print(serializer.is_valid())
+        if serializer.is_valid():
+            serializer.save()
+            return Response(status=status.HTTP_201_CREATED, data=serializer.data)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+        
 
     # Appel de l'objet par son nom
-    def get_object(self, queryset=None, **kwargs):
-        item = self.kwargs.get('pk')
-        return get_object_or_404(Produit, nom=item)
+    # def get_object(self, queryset=None, **kwargs):
+    #     item = self.kwargs.get('pk')
+    #     return get_object_or_404(Produit, nom=item)
 
+    
     # Définition d'un queryset personnalisé
-    def get_queryset(self):
-        return Produit.objects.all()
+    # def get_queryset(self):
+    #     return Produit.objects.all()
 
 # CRUD sur utilisateur(Personnel)
 class UserCreate(viewsets.ViewSet):
@@ -134,35 +235,6 @@ class UserCreate(viewsets.ViewSet):
     # def destroy(self, request, pk=None):
     #     pass
 
-
-""" class ProduitList(generics.ListCreateAPIView):
-    queryset = Produit.objects.all()
-    serializer_class = ProduitSerializer
-
-class ProduitDetail(generics.RetrieveDestroyAPIView):
-    queryset = Produit.objects.all()
-    serializer_class = ProduitSerializer """
-
-""" Concrete View Classes
-# CreateAPIView
-Used for create-only endpoints.
-# ListAPIView
-Used for read-only endpoints to represent a collection of model instances.
-# RetrieveAPIView
-Used for read-only endpoints to represent a single model instance.
-# DestroyAPIView
-Used for delete-only endpoints for a single model instance.
-# UpdateAPIView
-Used for update-only endpoints for a single model instance.
-# ListCreateAPIView
-Used for read-write endpoints to represent a collection of model instances.
-RetrieveUpdateAPIView
-Used for read or update endpoints to represent a single model instance.
-# RetrieveDestroyAPIView
-Used for read or delete endpoints to represent a single model instance.
-# RetrieveUpdateDestroyAPIView
-Used for read-write-delete endpoints to represent a single model instance.
-"""
 
 class CommandeList(viewsets.ViewSet):
     permission_classes = [CommandeUserPermission]
@@ -224,6 +296,7 @@ class CommandeList(viewsets.ViewSet):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request, pk=None):
+        print('************************Partial update')
         return Response({'http_method': 'PATCH'})
 
  

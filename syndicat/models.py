@@ -7,6 +7,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.views.generic import TemplateView
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+from django.http import Http404
 
 
 # Create your models here.
@@ -95,6 +96,13 @@ class Utilisateur(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f"{self.user_name} {self.first_name}"
+
+    
+    def get_object(self, pk):
+        try:
+            return Utilisateur.objects.get(pk=pk)
+        except Utilisateur.DoesNotExist:
+            raise Http404
 
     
 
@@ -198,6 +206,12 @@ class Doleance(models.Model):
         """
         return f"{self.emeteur} -- Objet : {self.objet} --"
 
+    def get_object(self, pk):
+        try:
+            return Doleance.objects.get(pk=pk)
+        except Doleance.DoesNotExist:
+            raise Http404
+
 
 class SessionCse(models.Model):
     mois = models.CharField(max_length=60)
@@ -264,15 +278,34 @@ class Reponse(models.Model):
         nous traitons
         """
         return self.objet
+    
+    def get_object(self, pk):
+        try:
+            return Reponse.objects.get(pk=pk)
+        except Reponse.DoesNotExist:
+            raise Http404
 
 class ReponseElu(Reponse):
     doleance = models.ForeignKey(DoleanceElu, on_delete=models.CASCADE, related_name='question_elu')
     emeteur = models.ForeignKey(Elu, on_delete=models.CASCADE, related_name='emetteur_reponse_elu')
 
+    
+    def get_object(self, pk):
+        try:
+            return ReponseElu.objects.get(pk=pk)
+        except ReponseElu.DoesNotExist:
+            raise Http404
+
 
 class ReponseCse(Reponse):
     doleance = models.ForeignKey(DoleanceCse, on_delete=models.CASCADE, related_name='question_cse')
     emeteur = models.ForeignKey('Cse', on_delete=models.CASCADE, related_name='emetteur_reponse_cse')
+
+    def get_object(self, pk):
+        try:
+            return ReponseCse.objects.get(pk=pk)
+        except ReponseCse.DoesNotExist:
+            raise Http404
 
 class Produit(models.Model):
 
@@ -284,7 +317,7 @@ class Produit(models.Model):
     nom = models.CharField(max_length=42)
     prix_adulte = models.FloatField(default=0)
     prix_enfant = models.FloatField(default=0)
-    disponible = models.BooleanField(default=False)
+    disponible = models.BooleanField()
     photo = models.ImageField(upload_to='img-produits/', null=True)
     # objects = models.Manager # default manager
     # produitdispo = ProduitDispo()
@@ -294,6 +327,12 @@ class Produit(models.Model):
 
     def __str__(self):
         return self.nom
+    
+    def get_object(self, pk):
+        try:
+            return Produit.objects.get(pk=pk)
+        except Produit.DoesNotExist:
+            raise Http404
 
 
 class Commande(models.Model):
@@ -334,6 +373,12 @@ class Commande(models.Model):
     def total(self):
         return self.valeur_totale
 
+    def get_object(self, pk):
+        try:
+            return Commande.objects.get(pk=pk)
+        except Commande.DoesNotExist:
+            raise Http404
+
 
 class Service(models.Model):
     nom_service = models.CharField(max_length=42)
@@ -344,6 +389,12 @@ class Service(models.Model):
 
     def __str__(self):
         return self.nom_service
+
+    def get_object(self, pk):
+        try:
+            return Service.objects.get(pk=pk)
+        except Service.DoesNotExist:
+            raise Http404
 
 
 class Clinique(models.Model):
@@ -356,6 +407,12 @@ class Clinique(models.Model):
     def __str__(self):
         return self.nom_clinique
 
+    def get_object(self, pk):
+        try:
+            return Clinique.objects.get(pk=pk)
+        except Clinique.DoesNotExist:
+            raise Http404
+
 
 class Cse(models.Model):
     nom = models.CharField(max_length=60)
@@ -363,3 +420,9 @@ class Cse(models.Model):
 
     def __str__(self):
         return f"{self.nom}"
+
+    def get_object(self, pk):
+        try:
+            return Cse.objects.get(pk=pk)
+        except Cse.DoesNotExist:
+            raise Http404

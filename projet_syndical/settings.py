@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 import os
+import environ
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -21,19 +22,25 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-b%$6ffu+ghjszaa#i0^t#flf(&ofrsw$oa8amu3gt_3pj#g-63'
+env = environ.Env()
+environ.Env.read_env()
+SECRET_KEY = env('SECRET_KEY')
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = []
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.1.48']
+
+CORS_ORIGIN_WHITELIST = [
+    "http://localhost:3000", # pour ReactJs
+    
+    'http://192.168.1.48:8000' # pour Flutter avec le tel connecté en usb à l'ordi avec ip wifi 192.168.1.48 et serveur démarré à http://192.168.1.48:8000.  
 ]
+#CORS_ALLOWED_ALL_ORIGINS = True 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

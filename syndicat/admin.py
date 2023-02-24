@@ -157,7 +157,7 @@ class CommandeAdmin(admin.ModelAdmin): # Personnalisation de l'affichage et de l
 
 
 class ProduitAdmin(admin.ModelAdmin): # Personnalisation de l'affichage et de la gestion dans la page admin
-    list_display = ('nom', 'prix_adulte', 'prix_enfant', 'disponible', 'photo')
+    list_display = ('id','nom', 'prix_adulte', 'prix_enfant', 'disponible', 'photo')
     list_filter = ('nom','disponible')
     ordering = ('nom', )
     search_fields = ('nom',)

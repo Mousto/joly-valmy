@@ -38,7 +38,7 @@ class RegisterEluSerializer(RegisterPersonnelSerializer):
 class ProduitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Produit
-        fields = ('id', 'nom', 'prix_adulte', 'prix_enfant', 'disponible', 'photo')
+        fields = ('id', 'nom', 'prix_adulte', 'prix_enfant', 'photo', 'disponible')
 
 class CommandeSerializer(serializers.ModelSerializer):
 
