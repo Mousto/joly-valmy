@@ -43,7 +43,7 @@ class ProduitSerializer(serializers.ModelSerializer):
 class CommandeSerializer(serializers.ModelSerializer):
 
     # Nous redéfinissons l'attribut 'produit' qui porte le même nom que dans la liste des champs à afficher
-    produit = ProduitSerializer(read_only=True)
+    produit = ProduitSerializer(many=True)
 
     class Meta:
         model = Commande

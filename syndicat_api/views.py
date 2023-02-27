@@ -79,7 +79,7 @@ class InfoPermission(BasePermission):
 # Utilisation de ModelViewSet
 class ProduitList(viewsets.ViewSet):
     permission_classes = [AllowAny]
-    serializer_class = ProduitSerializer
+    serializer_class = ProduitSerializer(many=True)
     queryset = Produit.objects.all()
 
     def get_object(self, pk):
@@ -124,40 +124,6 @@ class ProduitList(viewsets.ViewSet):
         produit.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    # Update produit
-    # def patch(self, request, pk=None):
-    #     pass
-        # donnees = {
-        #     'nom': request.data['donnees[nom]'],
-        #      'prix_adulte': request.data['donnees[prix_adulte]'],
-        #      'prix_enfant': request.data['donnees[prix_enfant]'],
-        #      #'photo': request.data['image']
-        #      #'photo': request.FILES['image']
-        # }
-       # print('***********************',request.data["image"])
-        # produit = get_object_or_404(self.queryset, pk=pk)
-        # serializer = ProduitSerializer(produit, request.data, partial=True) # set partial=True to update a data partially
-        # print(serializer.is_valid())
-        # if serializer.is_valid():
-        #     serializer.save()
-        #     return Response(status=status.HTTP_201_CREATED, data=serializer.data)
-        # return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        # produit = Produit.objects.get(id=pk)
-        # print(request.data)
-        # donnees = {
-        #     'nom': request.data['donnees[nom]'],
-        #      'prix_adulte': request.data['donnees[prix_adulte]'],
-        #      'prix_enfant': request.data['donnees[prix_enfant]'],
-        #      'photo': request.data['image']
-        # }
-        # if(request.data['donnees[nom]']):
-        #     produit.nom = request.data['donnees[nom]'] 
-        #     produit.save()  
-        #     print('J ai modifie un produit ici')
-        #     return Response(data={'id': produit.id}, status=status.HTTP_201_CREATED)
-        # print('Modification échec !')
-        # return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request, pk=None):
         produit = get_object_or_404(self.queryset, pk=pk)
@@ -237,7 +203,8 @@ class UserCreate(viewsets.ViewSet):
 
 
 class CommandeList(viewsets.ViewSet):
-    permission_classes = [CommandeUserPermission]
+    #permission_classes = [CommandeUserPermission]
+    permission_classes = [AllowAny]
     serializer_class = CommandeSerializer
     
     def get_queryset(self):
@@ -246,10 +213,10 @@ class CommandeList(viewsets.ViewSet):
         for the currently authenticated user.
         """
         user = self.request.user.id
-        return Commande.objects.filter(commanditaire=user)
+        return Commande.objects.filter(commanditaire=1)
 
     def list(self, request):
-        #print('#######################', request.user.id)
+        print('#######################', request.user.id)
         serializer_class = CommandeSerializer(self.get_queryset(), many=True)
         return Response(serializer_class.data)
 
@@ -260,9 +227,19 @@ class CommandeList(viewsets.ViewSet):
         return Response(serializer_class.data)
     
     def create(self, request):
-        produit_id = request.data['produit']  # or however you are sending the id
-        reg_seralizer = CommandeSerializer(data=request.data)
-        #print('#####################################@',reg_seralizer.is_valid())
+        # Decode UTF-8 bytes to Unicode, and convert single quotes 
+        # to double quotes to make it valid JSON
+        my_json = request.body.decode('utf8').replace("'", '"')
+        # Load the JSON to get a Python dict
+        data = json.loads(my_json)
+        
+        #produit_id = request.data['produit']  # or however you are sending the id
+        if isinstance(data, dict):
+            print('#####################################', data['produits'])
+            reg_seralizer = CommandeSerializer(data=request.data, many=True)
+        else:
+            reg_seralizer = CommandeSerializer(data=request.data)
+        print('#####################################@',reg_seralizer.is_valid())
         if reg_seralizer.is_valid():
             produit_instance = get_object_or_404(Produit, id=produit_id)
             newcommande = reg_seralizer.save(produit=produit_instance)

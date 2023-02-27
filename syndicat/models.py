@@ -345,7 +345,7 @@ class Commande(models.Model):
         ('Talant', 'Bénigne joly'),
         ('Valmy', 'SSR Valmy'),
     )
-    produit = models.ForeignKey(Produit, on_delete=models.CASCADE, related_name='produit')
+    produit = models.ForeignKey(Produit, on_delete=models.CASCADE, related_name='produits')
     billet_adulte = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0)])
     billet_enfant = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0)])
     valeur_totale = models.FloatField(default=0)
