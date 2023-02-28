@@ -143,7 +143,7 @@ class DoleanceCseAdmin(admin.ModelAdmin):
 
 
 class CommandeAdmin(admin.ModelAdmin): # Personnalisation de l'affichage et de la gestion dans la page admin
-    list_display = ('id','produit', 'commanditaire', 'prix_enfant','prix_adulte','billet_enfant', 'billet_adulte', 'total', 'lieu_retrait', 'date_retrait', 'date')
+    list_display = ('id','produit', 'commanditaire', 'prix_enfant','prix_adulte', 'total', 'lieu_retrait', 'date_retrait', 'date')
     list_filter = ('produit', 'id', 'lieu_retrait', 'commanditaire')
     date_hierarchy = 'date'
     ordering = ('date', )

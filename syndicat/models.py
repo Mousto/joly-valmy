@@ -319,6 +319,8 @@ class Produit(models.Model):
     prix_enfant = models.FloatField(default=0)
     disponible = models.BooleanField()
     photo = models.ImageField(upload_to='img-produits/', null=True)
+    billet_adulte = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0)], blank=True)
+    billet_enfant = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0)], blank=True)
     # objects = models.Manager # default manager
     # produitdispo = ProduitDispo()
 
@@ -346,8 +348,8 @@ class Commande(models.Model):
         ('Valmy', 'SSR Valmy'),
     )
     produit = models.ForeignKey(Produit, on_delete=models.CASCADE, related_name='produit')
-    billet_adulte = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0)])
-    billet_enfant = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0)])
+    # billet_adulte = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0)])
+    # billet_enfant = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0)])
     valeur_totale = models.FloatField(default=0)
     date_retrait = models.DateField(null=True)
     lieu_retrait = models.CharField(
