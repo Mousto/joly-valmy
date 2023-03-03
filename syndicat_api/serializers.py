@@ -1,7 +1,8 @@
 from dataclasses import fields
 from pyexpat import model
 from rest_framework import serializers
-from syndicat.models import Produit, Commande, DoleanceElu, Info, Personnel, Clinique, Service, Elu
+from drf_writable_nested.serializers import WritableNestedModelSerializer
+from syndicat.models import Produit, Panier, DoleanceElu, Info, Personnel, Clinique, Service, Elu, Commande
 
 
 
@@ -38,16 +39,28 @@ class RegisterEluSerializer(RegisterPersonnelSerializer):
 class ProduitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Produit
-        fields = ('id', 'nom', 'prix_adulte', 'prix_enfant', 'billet_adulte', 'billet_enfant', 'photo', 'disponible')
+        fields = ('id','nom', 'prix_adulte', 'prix_enfant', 'photo', 'disponible')
 
-class CommandeSerializer(serializers.ModelSerializer):
 
-    # Nous redéfinissons l'attribut 'produit' qui porte le même nom que dans la liste des champs à afficher
-    produit = ProduitSerializer(read_only=True)
-
+# Voir au besoin sur github : https://github.com/beda-software/drf-writable-nested pour WritableNestedModelSerializer
+class CommandeSerializer(WritableNestedModelSerializer):
+    
+    produit = ProduitSerializer()
     class Meta:
         model = Commande
-        fields = ['id', 'produit', 'billet_adulte', 'billet_enfant', 'valeur_totale', 'date_retrait', 'date', 'lieu_retrait', 'commanditaire']
+        fields = ('id', 'produit', 'billet_adulte', 'billet_enfant', 'sous_total')
+
+
+# Voir au besoin sur github : https://github.com/beda-software/drf-writable-nested pour WritableNestedModelSerializer
+class PanierSerializer(WritableNestedModelSerializer):
+    
+    # Nous redéfinissons l'attribut 'commandes' qui porte le même nom que dans la liste des champs à afficher
+    commandes = CommandeSerializer(many=True)
+
+    class Meta:
+        model = Panier
+        fields = ['commandes', 'valeur_totale', 'date_retrait', 'date', 'lieu_retrait', 'commanditaire']
+    
 
 class DoleanceEluSerializer(serializers.ModelSerializer):
     class Meta:

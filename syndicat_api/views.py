@@ -16,9 +16,10 @@ from rest_framework.permissions import (
     AllowAny,)
 from django.shortcuts import get_object_or_404
 import json
+from datetime import datetime
 
-from syndicat.models import Produit, Commande, DoleanceElu, Info, Utilisateur, Clinique, Service, Elu
-from .serializers import ProduitSerializer, CommandeSerializer, DoleanceEluSerializer, InfoSerializer, RegisterPersonnelSerializer, PersonnelSerializer, CliniqueSerializer, ServiceSerializer, RegisterEluSerializer
+from syndicat.models import Produit, Panier, DoleanceElu, Info, Utilisateur, Clinique, Service, Elu
+from .serializers import ProduitSerializer, PanierSerializer, DoleanceEluSerializer, InfoSerializer, RegisterPersonnelSerializer, PersonnelSerializer, CliniqueSerializer, ServiceSerializer, RegisterEluSerializer
 
 """ # Création d'un utilisateur
 class CustumUserCreate(APIView):
@@ -90,7 +91,7 @@ class ProduitList(viewsets.ViewSet):
 
     # Renvoie tous les produits
     def list(self, request):
-        serializer_class = ProduitSerializer(self.queryset, many=True)
+        serializer_class = ProduitSerializer(self.queryset,many=True)
         return Response(serializer_class.data)
 
     # Renvoie un produit
@@ -106,6 +107,8 @@ class ProduitList(viewsets.ViewSet):
             'nom': request.data['donnees[nom]'],
             'prix_adulte': request.data['donnees[prix_adulte]'],
             'prix_enfant': request.data['donnees[prix_enfant]'],
+            'billet_adulte': request.data['donnees[billet_adulte]'],
+            'billet_enfant': request.data['donnees[billet_enfant]'],
             'photo': request.data['image'],
             'disponible': True,
         }
@@ -124,40 +127,6 @@ class ProduitList(viewsets.ViewSet):
         produit.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    # Update produit
-    # def patch(self, request, pk=None):
-    #     pass
-        # donnees = {
-        #     'nom': request.data['donnees[nom]'],
-        #      'prix_adulte': request.data['donnees[prix_adulte]'],
-        #      'prix_enfant': request.data['donnees[prix_enfant]'],
-        #      #'photo': request.data['image']
-        #      #'photo': request.FILES['image']
-        # }
-       # print('***********************',request.data["image"])
-        # produit = get_object_or_404(self.queryset, pk=pk)
-        # serializer = ProduitSerializer(produit, request.data, partial=True) # set partial=True to update a data partially
-        # print(serializer.is_valid())
-        # if serializer.is_valid():
-        #     serializer.save()
-        #     return Response(status=status.HTTP_201_CREATED, data=serializer.data)
-        # return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        # produit = Produit.objects.get(id=pk)
-        # print(request.data)
-        # donnees = {
-        #     'nom': request.data['donnees[nom]'],
-        #      'prix_adulte': request.data['donnees[prix_adulte]'],
-        #      'prix_enfant': request.data['donnees[prix_enfant]'],
-        #      'photo': request.data['image']
-        # }
-        # if(request.data['donnees[nom]']):
-        #     produit.nom = request.data['donnees[nom]'] 
-        #     produit.save()  
-        #     print('J ai modifie un produit ici')
-        #     return Response(data={'id': produit.id}, status=status.HTTP_201_CREATED)
-        # print('Modification échec !')
-        # return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request, pk=None):
         produit = get_object_or_404(self.queryset, pk=pk)
@@ -236,9 +205,10 @@ class UserCreate(viewsets.ViewSet):
     #     pass
 
 
-class CommandeList(viewsets.ViewSet):
-    permission_classes = [CommandeUserPermission]
-    serializer_class = CommandeSerializer
+class PanierList(viewsets.ViewSet):
+    #permission_classes = [CommandeUserPermission]
+    permission_classes = [AllowAny]
+    serializer_class = PanierSerializer
     
     def get_queryset(self):
         """
@@ -246,32 +216,72 @@ class CommandeList(viewsets.ViewSet):
         for the currently authenticated user.
         """
         user = self.request.user.id
-        return Commande.objects.filter(commanditaire=user)
+        return Panier.objects.filter(commanditaire=1)
 
     def list(self, request):
-        #print('#######################', request.user.id)
-        serializer_class = CommandeSerializer(self.get_queryset(), many=True)
+        print('#######################', request.user.id)
+        serializer_class = PanierSerializer(self.get_queryset(), many=True)
         return Response(serializer_class.data)
 
     def retrieve(self, request, pk=None):
         queryset = self.get_queryset()
         post = get_object_or_404(queryset, pk=pk)
-        serializer_class = CommandeSerializer(post)
+        serializer_class = PanierSerializer(post)
         return Response(serializer_class.data)
     
+    
+    
     def create(self, request):
-        produit_id = request.data['produit']  # or however you are sending the id
-        reg_seralizer = CommandeSerializer(data=request.data)
-        #print('#####################################@',reg_seralizer.is_valid())
+        # Decode UTF-8 bytes to Unicode, and convert single quotes 
+        # to double quotes to make it valid JSON
+        my_json = request.body.decode('utf8').replace("'", '"')
+        # Load the JSON to get a Python dict
+        requete = json.loads(my_json)
+
+        # format
+        formateur = '%Y-%m-%d'
+        
+        #Fonction permettant de mapper requete['commandes'].
+        def f(e):
+            return {
+                'produit': {
+                    'id': e['id'],
+                    'nom': e['nom'],
+                    'prix_adulte': e['prix_adulte'],
+                    'prix_enfant': e['prix_enfant'],
+                    'disponible': True,
+                },
+                'billet_adulte': e['billet_adulte'],
+                'billet_enfant': e['billet_enfant'],
+                'sous_total': e['sous_total'],
+                }
+        commandes = map(f, requete['commandes'])
+        
+        #Remarque : sur les dates ci-dessous, il a fallut faire un slice pour récupérer les 10 premiers caratères, les formater avec le pattern formateur et convertir le datetime obtenu en date d'ou le date() de fin
+        donnees = {
+            'commandes': list(commandes),
+            'valeur_totale': requete['valeur_totale'],
+            "date_retrait": datetime.strptime(requete['date_retrait'][:10], formateur).date(),
+            "date": datetime.strptime(requete['date'][:10], formateur).date(),
+            "lieu_retrait": requete['lieu_retrait'],
+            "commanditaire": requete['commanditaire']
+        }
+
+        print('£££££££££££££££££ length : ',requete['date_retrait'][:10])
+        
+        reg_seralizer = PanierSerializer(data=donnees)
+        print('#####################################@',reg_seralizer.is_valid())
         if reg_seralizer.is_valid():
-            produit_instance = get_object_or_404(Produit, id=produit_id)
-            newcommande = reg_seralizer.save(produit=produit_instance)
-            if newcommande:
-                return Response(status=status.HTTP_201_CREATED)
+            panier = reg_seralizer.save()
+            if panier:
+                # déserialisation avant retour réponse au front
+                panier = PanierSerializer(panier).data
+                return Response(data=panier, status=status.HTTP_201_CREATED)
+        print(reg_seralizer.errors)
         return Response(reg_seralizer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def destroy(self, request, pk=None):
-        item = Commande.objects.filter(id=pk)
+        item = Panier.objects.filter(id=pk)
         if len(item) == 1:
             item.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -279,7 +289,7 @@ class CommandeList(viewsets.ViewSet):
 
 
     def update(self, request, pk=None):
-        commande = Commande.objects.get(id=pk)
+        commande = Panier.objects.get(id=pk)
         print(request.data)
         data = {
             "billet_adulte": request.data['billet_adulte'],
