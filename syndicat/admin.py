@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.utils.text import Truncator
 from .models import Utilisateur, DoleanceElu, DoleanceCse,\
-    Commande, Produit, Clinique, Service, Personnel, registre_du_personnel,\
+    Panier, Produit, Commande, Clinique, Service, Personnel, registre_du_personnel,\
     Elu, Reponse, Personnel, SessionCse, Cse, ReponseElu, ReponseCse, Info, CategoryInfo 
 from .forms import MonPersonnelCreationForm, MonEluCreationForm, MonUserChangeForm
 
@@ -142,9 +142,9 @@ class DoleanceCseAdmin(admin.ModelAdmin):
     )
 
 
-class CommandeAdmin(admin.ModelAdmin): # Personnalisation de l'affichage et de la gestion dans la page admin
-    list_display = ('id','produit', 'commanditaire', 'prix_enfant','prix_adulte','billet_enfant', 'billet_adulte', 'total', 'lieu_retrait', 'date_retrait', 'date')
-    list_filter = ('produit', 'id', 'lieu_retrait', 'commanditaire')
+class PanierAdmin(admin.ModelAdmin): # Personnalisation de l'affichage et de la gestion dans la page admin
+    list_display = ('id', 'commanditaire', 'total', 'lieu_retrait', 'date_retrait', 'date')
+    list_filter = ('id', 'lieu_retrait', 'commanditaire')
     date_hierarchy = 'date'
     ordering = ('date', )
     search_fields  = ('valeur_totale',)
@@ -161,6 +161,12 @@ class ProduitAdmin(admin.ModelAdmin): # Personnalisation de l'affichage et de la
     list_filter = ('nom','disponible')
     ordering = ('nom', )
     search_fields = ('nom',)
+
+class CommandeAdmin(admin.ModelAdmin): # Personnalisation de l'affichage et de la gestion dans la page admin
+    list_display = ('id', 'billet_adulte', 'billet_enfant', 'sous_total')
+    list_filter = ('billet_adulte', 'billet_enfant')
+    ordering = ('billet_adulte', )
+    search_fields = ('billet_adulte',)
 
 
 class CliniqueAdmin(admin.ModelAdmin):
@@ -234,8 +240,9 @@ admin.site.register(Personnel, PersonnelAdmin)
 admin.site.register(Elu, EluAdmin)
 admin.site.register(DoleanceElu, DoleanceEluAdmin)
 admin.site.register(DoleanceCse, DoleanceCseAdmin)
-admin.site.register(Commande, CommandeAdmin)
+admin.site.register(Panier, PanierAdmin)
 admin.site.register(Produit, ProduitAdmin)
+admin.site.register(Commande, CommandeAdmin)
 admin.site.register(Clinique, CliniqueAdmin)
 admin.site.register(Service, ServiceAdmin)
 admin.site.register(registre_du_personnel, RegistreDuPersonnelAdmin)

@@ -319,6 +319,10 @@ class Produit(models.Model):
     prix_enfant = models.FloatField(default=0)
     disponible = models.BooleanField()
     photo = models.ImageField(upload_to='img-produits/', null=True)
+    # billet_adulte = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0)], blank=True)
+    # billet_enfant = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0)], blank=True)
+    # sous_total = models.FloatField(default=0)
+
     # objects = models.Manager # default manager
     # produitdispo = ProduitDispo()
 
@@ -336,8 +340,29 @@ class Produit(models.Model):
 
 
 class Commande(models.Model):
+    produit = models.ForeignKey(Produit, on_delete=models.CASCADE, related_name='produit')
+    billet_adulte = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0)], blank=True)
+    billet_enfant = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0)], blank=True)
+    sous_total = models.FloatField(default=0)
 
-    class CommandeObjects(models.Manager):
+    class Meta:
+        verbose_name = "commande"
+
+    def __str__(self):
+        return f'Commande {self.produit}'
+    
+    def get_object(self, pk):
+        try:
+            return Commande.objects.get(pk=pk)
+        except Commande.DoesNotExist:
+            raise Http404
+    
+    def getSousTotal(self):
+        return (self.produit.prix_adulte * self.billet_adulte) + (self.produit.prix_enfant * self.billet_enfant)
+
+class Panier(models.Model):
+
+    class PanierObjects(models.Manager):
         def get_queryset(self):
             return super().get_queryset() .filter(commanditaire=self.commanditaire)
 
@@ -345,9 +370,9 @@ class Commande(models.Model):
         ('Talant', 'Bénigne joly'),
         ('Valmy', 'SSR Valmy'),
     )
-    produit = models.ForeignKey(Produit, on_delete=models.CASCADE, related_name='produits')
-    billet_adulte = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0)])
-    billet_enfant = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0)])
+    commandes = models.ManyToManyField(Commande)
+    # billet_adulte = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0)])
+    # billet_enfant = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0)])
     valeur_totale = models.FloatField(default=0)
     date_retrait = models.DateField(null=True)
     lieu_retrait = models.CharField(
@@ -364,10 +389,11 @@ class Commande(models.Model):
 
 
     objects = models.Manager() # Manager par defaut
-    infoObjects = CommandeObjects() # Manager personnalisé
+    infoObjects = PanierObjects() # Manager personnalisé
 
 
     def __str__(self):
+        return f'Commande {self.commanditaire}'
         return str(self.produit)
 
     def total(self):
@@ -375,8 +401,8 @@ class Commande(models.Model):
 
     def get_object(self, pk):
         try:
-            return Commande.objects.get(pk=pk)
-        except Commande.DoesNotExist:
+            return Panier.objects.get(pk=pk)
+        except Panier.DoesNotExist:
             raise Http404
 
 
