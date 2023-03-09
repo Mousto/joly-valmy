@@ -80,7 +80,7 @@ class InfoPermission(BasePermission):
 # Utilisation de ModelViewSet
 class ProduitList(viewsets.ViewSet):
     permission_classes = [AllowAny]
-    serializer_class = ProduitSerializer
+    serializer_class = ProduitSerializer(many=True)
     queryset = Produit.objects.all()
 
     def get_object(self, pk):
