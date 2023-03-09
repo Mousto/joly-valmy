@@ -163,10 +163,10 @@ class ProduitAdmin(admin.ModelAdmin): # Personnalisation de l'affichage et de la
     search_fields = ('nom',)
 
 class CommandeAdmin(admin.ModelAdmin): # Personnalisation de l'affichage et de la gestion dans la page admin
-    list_display = ('id', 'billet_adulte', 'billet_enfant', 'sous_total')
-    list_filter = ('billet_adulte', 'billet_enfant')
-    ordering = ('billet_adulte', )
-    search_fields = ('billet_adulte',)
+    list_display = ('id', 'produit', 'billet_adulte', 'billet_enfant', 'sous_total')
+    list_filter = ('produit',)
+    ordering = ('id', )
+    search_fields = ('produit',)
 
 
 class CliniqueAdmin(admin.ModelAdmin):
