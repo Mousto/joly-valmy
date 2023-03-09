@@ -314,11 +314,11 @@ class Produit(models.Model):
     #     def get_queryset(self):
     #         return super().get_queryset().filter(disponible=True)
 
-    nom = models.CharField(max_length=42)
+    nom = models.CharField(max_length=42, blank=False, null=False)
     prix_adulte = models.FloatField(default=0)
     prix_enfant = models.FloatField(default=0)
     disponible = models.BooleanField()
-    photo = models.ImageField(upload_to='img-produits/', null=True)
+    photo = models.ImageField(upload_to='img-produits/', null=False, default='')
     # billet_adulte = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0)], blank=True)
     # billet_enfant = models.PositiveIntegerField(default=0, validators=[MinValueValidator(0)], blank=True)
     # sous_total = models.FloatField(default=0)
