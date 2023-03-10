@@ -94,14 +94,14 @@ class ProduitList(viewsets.ViewSet):
         serializer_class = ProduitSerializer(self.queryset,many=True)
         return Response(serializer_class.data)
 
-    # Renvoie un produit
+    # Renvoie un produit(methode get)
     def retrieve(self, request, pk=None):
         produit = get_object_or_404(self.queryset, pk=pk)
         print('*******************',produit)
         serializer_class = ProduitSerializer(produit)
         return Response(serializer_class.data)  
 
-    # Crée un produit
+    # Crée un produit(methode post)
     def create(self, request):
         donnees = {
             'nom': request.data['donnees[nom]'],
@@ -121,13 +121,13 @@ class ProduitList(viewsets.ViewSet):
                 return Response(data=produit, status=status.HTTP_201_CREATED)
         return Response(reg_seralizer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # Supprimer un produit
+    # Supprimer un produit(methode post)
     def destroy(self, request, pk=None):
         produit = get_object_or_404(self.queryset, pk=pk)
         produit.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
+    #(methode patch)
     def partial_update(self, request, pk=None):
         produit = get_object_or_404(self.queryset, pk=pk)
         # Decode UTF-8 bytes to Unicode, and convert single quotes 
