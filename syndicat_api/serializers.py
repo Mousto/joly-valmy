@@ -42,14 +42,7 @@ class ProduitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Produit
         fields = ('id','nom', 'prix_adulte', 'prix_enfant', 'photo', 'disponible')
-        
-
-    # def create(self, validated_data):
-    #     commandes_data = validated_data.pop("commandes")
-    #     produit = Produit.objects.create(**validated_data)
-    #     for commande_data in commandes_data:
-    #         Commande.objects.create(produit=produit, **commande_data)
-    #     return produit
+    
 
 class CommandeSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False) #Permet d'avoir l'id dans le parametre(validated_data) de la methode create. 
@@ -61,23 +54,33 @@ class CommandeSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         produit = Produit.objects.get(id=validated_data['produit']['id'])
-        print('****************',produit)
-        
         validated_data.pop("produit")#indispensable retrait de produit avant de réinjecter l'objet produit créer ci-dessus dans la création de la commande ci-dessous
         commande = Commande.objects.create(produit=produit, **validated_data)
         
         return commande
 
 
-class PanierSerializer(WritableNestedModelSerializer):
+class PanierSerializer(serializers.ModelSerializer):
     
     # Nous redéfinissons l'attribut 'commandes' qui porte le même nom que dans la liste des champs à afficher
     commandes = CommandeSerializer(many=True)
 
     class Meta:
         model = Panier
-        fields = ['commandes', 'valeur_totale', 'date_retrait', 'date', 'lieu_retrait', 'commanditaire']
+        fields = ['commandes', 'valeur_totale', 'date_retrait', 'date', 
+        'lieu_retrait', 'commanditaire']
     
+    def create(self, validated_data):
+        commandes_data = validated_data.pop('commandes')
+        panier = Panier.objects.create(**validated_data)
+        for commande_data in commandes_data:
+            prodId = commande_data.pop('produit')['id']
+            produit = Produit.objects.get(id=prodId)
+            commande = Commande.objects.create(produit=produit, **commande_data)
+            panier.commandes.add(commande)
+            
+        return panier
+
 
 class DoleanceEluSerializer(serializers.ModelSerializer):
     class Meta:

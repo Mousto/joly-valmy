@@ -238,7 +238,9 @@ class PanierList(viewsets.ViewSet):
         my_json = request.body.decode('utf8').replace("'", '"')
         # Load the JSON to get a Python dict
         requete = json.loads(my_json)
-
+        # print('************* request.data', request.data['commandes'])
+        # print('££££££££££££££££££££££££££££££')
+        # print('************* requete', requete)
         # format
         formateur = '%Y-%m-%d'
         
@@ -268,10 +270,10 @@ class PanierList(viewsets.ViewSet):
             "commanditaire": requete['commanditaire']
         }
 
-        print('£££££££££££££££££ length : ',requete['date_retrait'][:10])
+        #print('£££££££££££££££££ length : ',requete['date_retrait'][:10])
         
         reg_seralizer = PanierSerializer(data=donnees)
-        print('#####################################@',reg_seralizer.is_valid())
+        #print('#####################################@',reg_seralizer.is_valid())
         if reg_seralizer.is_valid():
             panier = reg_seralizer.save()
             if panier:
