@@ -3,6 +3,7 @@ from pyexpat import model
 from rest_framework import serializers
 from drf_writable_nested.serializers import WritableNestedModelSerializer
 from syndicat.models import Produit, Panier, DoleanceElu, Info, Personnel, Clinique, Service, Elu, Commande
+import json
 
 
 
@@ -37,21 +38,37 @@ class RegisterEluSerializer(RegisterPersonnelSerializer):
 
 
 class ProduitSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False) #Permet d'avoir l'id dans le parametre(validated_data) de la methode create.
     class Meta:
         model = Produit
         fields = ('id','nom', 'prix_adulte', 'prix_enfant', 'photo', 'disponible')
+        
 
+    # def create(self, validated_data):
+    #     commandes_data = validated_data.pop("commandes")
+    #     produit = Produit.objects.create(**validated_data)
+    #     for commande_data in commandes_data:
+    #         Commande.objects.create(produit=produit, **commande_data)
+    #     return produit
 
-# Voir au besoin sur github : https://github.com/beda-software/drf-writable-nested pour WritableNestedModelSerializer
-class CommandeSerializer(WritableNestedModelSerializer):
-    
+class CommandeSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False) #Permet d'avoir l'id dans le parametre(validated_data) de la methode create. 
+
     produit = ProduitSerializer()
     class Meta:
         model = Commande
-        fields = ('id', 'produit', 'billet_adulte', 'billet_enfant', 'sous_total')
+        fields = ('id', 'billet_adulte', 'billet_enfant', 'sous_total', 'produit')
+
+    def create(self, validated_data):
+        produit = Produit.objects.get(id=validated_data['produit']['id'])
+        print('****************',produit)
+        
+        validated_data.pop("produit")#indispensable retrait de produit avant de réinjecter l'objet produit créer ci-dessus dans la création de la commande ci-dessous
+        commande = Commande.objects.create(produit=produit, **validated_data)
+        
+        return commande
 
 
-# Voir au besoin sur github : https://github.com/beda-software/drf-writable-nested pour WritableNestedModelSerializer
 class PanierSerializer(WritableNestedModelSerializer):
     
     # Nous redéfinissons l'attribut 'commandes' qui porte le même nom que dans la liste des champs à afficher

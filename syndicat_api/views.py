@@ -18,8 +18,8 @@ from django.shortcuts import get_object_or_404
 import json
 from datetime import datetime
 
-from syndicat.models import Produit, Panier, DoleanceElu, Info, Utilisateur, Clinique, Service, Elu
-from .serializers import ProduitSerializer, PanierSerializer, DoleanceEluSerializer, InfoSerializer, RegisterPersonnelSerializer, PersonnelSerializer, CliniqueSerializer, ServiceSerializer, RegisterEluSerializer
+from syndicat.models import Produit, Panier, DoleanceElu, Info, Utilisateur, Clinique, Service, Elu, Commande
+from .serializers import ProduitSerializer, PanierSerializer, DoleanceEluSerializer, InfoSerializer, RegisterPersonnelSerializer, PersonnelSerializer, CliniqueSerializer, ServiceSerializer, RegisterEluSerializer, CommandeSerializer
 
 """ # Création d'un utilisateur
 class CustumUserCreate(APIView):
@@ -80,7 +80,7 @@ class InfoPermission(BasePermission):
 # Utilisation de ModelViewSet
 class ProduitList(viewsets.ViewSet):
     permission_classes = [AllowAny]
-    serializer_class = ProduitSerializer(many=True)
+    serializer_class = ProduitSerializer
     queryset = Produit.objects.all()
 
     def get_object(self, pk):
@@ -104,13 +104,14 @@ class ProduitList(viewsets.ViewSet):
     # Crée un produit(methode post)
     def create(self, request):
         donnees = {
-            'nom': request.data['donnees[nom]'],
-            'prix_adulte': request.data['donnees[prix_adulte]'],
-            'prix_enfant': request.data['donnees[prix_enfant]'],
-            'billet_adulte': request.data['donnees[billet_adulte]'],
-            'billet_enfant': request.data['donnees[billet_enfant]'],
-            'photo': request.data['image'],
+            'nom': request.data['nom'],#request.data['donnees[nom]'],
+            'prix_adulte': request.data['prix_adulte'],#request.data['donnees[prix_adulte]'],
+            'prix_enfant': request.data['prix_enfant'],#request.data['donnees[prix_enfant]'],
+            # 'billet_adulte': request.data['donnees[billet_adulte]'],
+            # 'billet_enfant': request.data['donnees[billet_enfant]'],
+            #'photo': request.data['image'],
             'disponible': True,
+            #'commandes':request.data['commandes']
         }
         reg_seralizer = ProduitSerializer(data=donnees)
         if reg_seralizer.is_valid():
@@ -309,7 +310,46 @@ class PanierList(viewsets.ViewSet):
         print('************************Partial update')
         return Response({'http_method': 'PATCH'})
 
+
+class CommandeList(viewsets.ViewSet):
+    #permission_classes = [CommandeUserPermission]
+    permission_classes = [AllowAny]
+    serializer_class = CommandeSerializer
+    queryset = Commande.objects.all()
+
+    def get_queryset(self):
+        """
+        This view should return a list of all the purchases
+        for the currently authenticated user.
+        """
+        user = self.request.user.id
+        return Panier.objects.filter(commanditaire=1)
+
+    def list(self, request):
+        print('#######################', request.user.id)
+        serializer_class = CommandeSerializer(self.queryset, many=True)
+        return Response(serializer_class.data)
  
+    def create(self, request):
+        donnees = {
+            'produit': request.data['produit'],
+            'billet_adulte': request.data['billet_adulte'],
+            'billet_enfant': request.data['billet_enfant'],
+            'sous_total': request.data['sous_total'],
+        }
+        reg_seralizer = CommandeSerializer(data=donnees)
+        if reg_seralizer.is_valid():
+            #print('*******************', reg_seralizer.validated_data['produit'])
+            newCommande = reg_seralizer.save()
+            if newCommande:
+                # déserialisation avant retour réponse au front
+                commande = CommandeSerializer(newCommande).data
+                return Response(data=commande, status=status.HTTP_201_CREATED)
+        print(reg_seralizer.errors)
+        return Response(reg_seralizer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 class DoleanceEluList(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
     queryset = DoleanceElu.objects.all()

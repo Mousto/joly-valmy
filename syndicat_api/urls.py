@@ -1,13 +1,14 @@
 from rest_framework.routers import DefaultRouter
 from django.urls import path, include
 
-from .views import ProduitList, PanierList, DoleanceEluList, InfoList, UserCreate, BlacklistTokenUpdateView, Cliniques, Services, ListServicesByCliniqueIdView
+from .views import ProduitList, PanierList, DoleanceEluList, InfoList, UserCreate, BlacklistTokenUpdateView, Cliniques, Services, ListServicesByCliniqueIdView, CommandeList
 
 app_name = 'syndicat_api'
 
 router = DefaultRouter()
 router.register('produits', ProduitList, basename='produits')
 router.register('panier', PanierList, basename='panier')
+router.register('commandes', CommandeList, basename='commandes')
 router.register('doleanceElus', DoleanceEluList, basename='doleanceElu')
 router.register('infos', InfoList, basename='info')
 router.register('userCreate', UserCreate, basename='user-create')
