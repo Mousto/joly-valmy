@@ -17,50 +17,57 @@ class TodoAdmin(admin.ModelAdmin):
     # add the fields of the model here
     list_display = ("title","description","completed")
 
+#VARIABLE UTILE POUR LES 2 CLASSES SUIVANTES
+lieu_travail = ('Lieu de travail', {'fields': ('la_clinique', 'le_service')})
 class UtilisateurAdmin(UserAdmin):
     model = Utilisateur
-    search_fields = ('email', 'user_name', 'first_name',)
-    list_filter = ('email', 'user_name', 'first_name', 'is_staff')
-    ordering = ('-start_date',)
-    list_display = ('id', 'email', 'user_name', 'first_name',
-                    'is_active', 'is_staff')
-    fieldsets = (
-        (None, {'fields': ('email', 'user_name', 'first_name',)}),
-        ('Permissions', {'fields': ('is_superuser', 'is_staff', 'is_active', 'groups')}),
-        ('Personal', {'fields': ('apropos', 'password')}),
-        #  'phone', 'la_clinique', 'le_service',
-    )
-    formfield_overrides = {
-        Utilisateur.apropos: {'widget': Textarea(attrs={'rows': 10, 'cols': 40})},
-    }
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('email', 'user_name', 'first_name', 'password1', 'password2', 'is_active', 'is_staff')}
-         ),
-    )
+    print(UserAdmin.fieldsets)
+    print(type(UserAdmin.fieldsets[0]))
+    search_fields = ('email', 'username', 'first_name',)
+    list_filter = ('email', 'username', 'first_name', 'is_staff')
+    ordering = ('username','-date_joined',)
+    list_display = ('id', 'email', 'username', 'first_name',
+                     'is_active', 'is_staff')
+
+    fieldsets = ((None, {'fields': ('username', 'password')}), 
+    ('Info Personelles', {'fields': ('civilite','first_name', 
+    'last_name', 'email', 'phone')}), 
+    lieu_travail,
+    ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}), 
+    ('Dates importantes', {'fields': ('last_login', 'date_joined')}))
     
 
 class PersonnelAdmin(UtilisateurAdmin):
     model: Personnel
-    fieldsets = (
-        (None, {'fields': ('email', 'user_name', 'first_name',)}),
-        ('Permissions', {'fields': ('is_superuser', 'is_staff', 'is_active','groups')}),
-        ('Personal', {'fields': ('apropos', 'phone', 'la_clinique', 'le_service', 'password')}),
-    )
+    search_fields = ('email', 'username', 'first_name')
+    list_filter = ('email', 'first_name', 'la_clinique', 'le_service')
+    ordering = ('username','-date_joined')
+    list_display = ('id', 'email', 'first_name',
+                    'is_active', 'is_staff', 'la_clinique', 'le_service')
     
+    add_fieldsets = (
+        ('Données Personnelles', {
+            #'classes': ('wide',), ou 'classes': ('collapse',),
+            'fields': ('civilite',('username', 'first_name'), ('phone', 'email'), ('password1', 'password2'), 'apropos')}
+         ),
+        lieu_travail,
+         ('Permissions', {'fields': ('is_superuser', 'is_staff', 'is_active','groups')}),
+    )
 
 class EluAdmin(PersonnelAdmin):
     model = Elu
-    fieldsets = (
-        (None, {'fields': ('email', 'user_name', 'first_name', 'syndicat')}),
-        ('Permissions', {'fields': ('is_superuser', 'is_staff', 'is_active','groups')}),
-        ('Personal', {'fields': ('message_aux_collègues', 'apropos','phone', 'la_clinique', 'le_service', 'disponible', 'password')}),
+    add_fieldsets = (
+        ('Données Personnelles', {
+            'classes': ('wide',),
+            'fields': ('civilite',('username', 'first_name'), ('phone', 'email'), ('password1', 'password2'), 'apropos')}
+         ),
+        lieu_travail,
+        ('Données Syndicales', {
+            'classes': ('wide',),
+            'fields': ('syndicat','fonction', 'photo', 'message_aux_collègues', 'cse', 'disponible')}
+         ),
+         ('Permissions', {'fields': ('is_superuser', 'is_staff', 'is_active','groups')}),
     )
-    formfield_overrides = {
-        Elu.apropos: {'widget': Textarea(attrs={'rows': 10, 'cols': 40})},
-        Elu.message_aux_collègues: {'widget': Textarea(attrs={'rows': 10, 'cols': 40})},
-    }
     
 class DoleanceEluAdmin(admin.ModelAdmin):
     # Personnalisation de l'affichage et de la gestion dans la page admin

@@ -56,6 +56,7 @@ class CustomAccountManager(BaseUserManager):
         other_fields.setdefault('is_staff', True)
         other_fields.setdefault('is_superuser', True)
         other_fields.setdefault('is_active', True)
+        other_fields.setdefault('last_name', '')
 
         if other_fields.get('is_staff') is not True:
             raise ValueError(
@@ -63,6 +64,8 @@ class CustomAccountManager(BaseUserManager):
         if other_fields.get('is_superuser') is not True:
             raise ValueError(
                 'Superuser must be assigned to is_superuser=True.')
+        if  not other_fields.get('last_name') :
+            return ''
 
         return self.create_user(email, password, **other_fields)
 
@@ -80,11 +83,12 @@ class CustomAccountManager(BaseUserManager):
 
 
 class Utilisateur(AbstractBaseUser, PermissionsMixin):
-
+    civilite = models.CharField(max_length=12, blank=False)
     email = models.EmailField(_('adresse mail'), unique=True)
-    user_name = models.CharField(max_length=150, unique=False)
+    username = models.CharField(max_length=150, unique=False)
     first_name = models.CharField(max_length=150, blank=False)
-    start_date = models.DateTimeField(default=timezone.now)
+    last_name = models.CharField(max_length=150, blank=True)
+    date_joined = models.DateTimeField(default=timezone.now)
     apropos = models.TextField(max_length=500, blank=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -95,7 +99,7 @@ class Utilisateur(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = []
 
     def __str__(self):
-        return f"{self.user_name} {self.first_name}"
+        return f"{self.civilite} {self.username} {self.first_name}"
 
     
     def get_object(self, pk):
@@ -103,14 +107,14 @@ class Utilisateur(AbstractBaseUser, PermissionsMixin):
             return Utilisateur.objects.get(pk=pk)
         except Utilisateur.DoesNotExist:
             raise Http404
-
+    
     
 
 class Personnel(Utilisateur):
-    civilite = models.CharField(max_length=12)
     phone = PhoneNumberField(null=False, blank=False, unique=False)
     la_clinique = models.ForeignKey('Clinique', on_delete=models.CASCADE, null=False, default=1, related_name='clinique')
     le_service = models.ForeignKey('Service', on_delete=models.CASCADE, null=False, default=1, related_name='service')
+
 
     def get_clinique(self):
         return self.la_clinique.nom_clinique
@@ -118,7 +122,9 @@ class Personnel(Utilisateur):
     def get_service(self):
         return self.le_service.nom_service
 
-
+    def username(self):
+        return self.user_name
+    
 
 """ class Personnel(AbstractUser):
     # Mes ajouts de champs

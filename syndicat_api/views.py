@@ -220,8 +220,9 @@ class PanierList(viewsets.ViewSet):
         return Panier.objects.filter(commanditaire=1)
 
     def list(self, request):
-        print('#######################', request.user.id)
+        #print('#######################', request.user.id)
         serializer_class = PanierSerializer(self.get_queryset(), many=True)
+        print('cocu')
         return Response(serializer_class.data)
 
     def retrieve(self, request, pk=None):
@@ -238,9 +239,7 @@ class PanierList(viewsets.ViewSet):
         my_json = request.body.decode('utf8').replace("'", '"')
         # Load the JSON to get a Python dict
         requete = json.loads(my_json)
-        # print('************* request.data', request.data['commandes'])
-        # print('££££££££££££££££££££££££££££££')
-        # print('************* requete', requete)
+        
         # format
         formateur = '%Y-%m-%d'
         
@@ -269,11 +268,8 @@ class PanierList(viewsets.ViewSet):
             "lieu_retrait": requete['lieu_retrait'],
             "commanditaire": requete['commanditaire']
         }
-
-        #print('£££££££££££££££££ length : ',requete['date_retrait'][:10])
         
         reg_seralizer = PanierSerializer(data=donnees)
-        #print('#####################################@',reg_seralizer.is_valid())
         if reg_seralizer.is_valid():
             panier = reg_seralizer.save()
             if panier:
@@ -353,7 +349,7 @@ class CommandeList(viewsets.ViewSet):
 
 
 class DoleanceEluList(viewsets.ViewSet):
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
     queryset = DoleanceElu.objects.all()
 
     def list(self, request):

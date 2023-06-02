@@ -61,13 +61,13 @@ class CommandeSerializer(serializers.ModelSerializer):
 
 
 class PanierSerializer(serializers.ModelSerializer):
-    
+    #id = serializers.IntegerField(required=False) #Permet d'avoir l'id dans le parametre(validated_data) de la methode create.
     # Nous redéfinissons l'attribut 'commandes' qui porte le même nom que dans la liste des champs à afficher
     commandes = CommandeSerializer(many=True)
 
     class Meta:
         model = Panier
-        fields = ['commandes', 'valeur_totale', 'date_retrait', 'date', 
+        fields = ['id','commandes', 'valeur_totale', 'date_retrait', 'date', 
         'lieu_retrait', 'commanditaire']
     
     def create(self, validated_data):
